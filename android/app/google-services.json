@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "44213832273",
+    "project_id": "marker-39904",
+    "storage_bucket": "marker-39904.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:44213832273:android:a92420267a841b126bc670",
+        "android_client_info": {
+          "package_name": "com.kmtemp.marker.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgpe7Vg3ktzj4x1cLgy1wVqVs00rvctKw"
+        },
+        {
+          "current_key": "AIzaSyCBYXwZjLGL2uolCtPPViijW5F0QqCl1wk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:44213832273:android:d90593cf6d5a5af86bc670",
+        "android_client_info": {
+          "package_name": "com.marker.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgpe7Vg3ktzj4x1cLgy1wVqVs00rvctKw"
+        },
+        {
+          "current_key": "AIzaSyCBYXwZjLGL2uolCtPPViijW5F0QqCl1wk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
