@@ -1,0 +1,43 @@
+import 'package:get/get.dart';
+import 'package:injectable/injectable.dart' as i;
+import 'package:marker/app/data/models/bar_drink_details_model/bar_drink_details_model.dart';
+import 'package:marker/app/data/services/bar_owner_service/bar_owner_service.dart';
+import 'package:marker/app/utils/constants/common_utils.dart';
+import 'package:marker/app/utils/helpers/exception/exception.dart';
+import 'package:marker/app/utils/helpers/injectable/injectable.dart';
+
+@i.lazySingleton
+@i.injectable
+class NearByDrinkDetailsController extends GetxController {
+  NearByDrinkDetailsController() {
+    onInit();
+  }
+
+  String drinkId = '';
+  RxBool isFetch = false.obs;
+  final drinksDetailsState = ApiState.initial().obs;
+  Rx<DrinkDetailsData> drinkData = DrinkDetailsData().obs;
+
+  Future<void> getDrinkDetailsData() async {
+    final requestData = <String, dynamic>{};
+
+    await getIt<BarOwnerService>().getDrinksDetails(drinkId, requestData).handler(
+      drinksDetailsState,
+      onSuccess: (value) {
+        if (value.statusCode == 200 && value.data != null) {
+          drinkData.value = value.data ?? DrinkDetailsData();
+
+          isFetch.value = true;
+        }
+      },
+      onFailed: (value) {
+        showError(value.error.description);
+      },
+    );
+  }
+
+  void disposeAll() {
+    drinkId = '';
+    drinkData = DrinkDetailsData().obs;
+  }
+}
