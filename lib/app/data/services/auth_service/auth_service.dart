@@ -119,6 +119,6 @@ abstract class AuthService {
   @GET(EndPoints.profile)
   Future<AuthModel> profileAPI();
 
-  @PATCH('/user/tapToPay')
-  Future<AuthModel> setTapToPayEnabled(@Body() Map<String, dynamic> data);
+  @POST('/user/tapToPay')
+  Future<AuthModel> setTapToPayEnabled(@Field('enabled') bool enabled);
 }

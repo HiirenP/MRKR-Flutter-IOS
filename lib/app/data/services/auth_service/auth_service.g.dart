@@ -546,14 +546,13 @@ class _AuthService implements AuthService {
   }
 
   @override
-  Future<AuthModel> setTapToPayEnabled(Map<String, dynamic> data) async {
+  Future<AuthModel> setTapToPayEnabled(bool enabled) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(data);
+    final _data = <String, dynamic>{'enabled': enabled};
     final _options = _setStreamType<AuthModel>(
-      Options(method: 'PATCH', headers: _headers, extra: _extra)
+      Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
             '/user/tapToPay',

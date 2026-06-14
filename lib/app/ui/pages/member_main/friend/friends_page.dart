@@ -37,6 +37,7 @@ class FriendsPage extends GetItHook<FriendListController> {
             appTitle: AppStrings.T.friendList,
             isSecondaryIcon: true,
             isHideBackButton: true,
+            enableKeyboardDismissButton: true,
             isPadding: true,
             secondaryIconName: ImageView(Assets.svg.addProfile),
             onSecondaryTap: AddFriendsPage.route,

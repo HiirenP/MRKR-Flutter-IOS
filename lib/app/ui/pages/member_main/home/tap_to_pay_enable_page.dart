@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/gestures.dart';
 import 'package:gap/gap.dart';
 import 'package:marker/app/global/app_config.dart';
@@ -41,7 +42,7 @@ class _TapToPayEnablePageState extends State<TapToPayEnablePage> {
     final prefs = getIt<SharedPreferences>();
     final nextValue = !prefs.getTapToPayEnabled;
     try {
-      final res = await getIt<AuthService>().setTapToPayEnabled({'enabled': nextValue});
+      final res = await getIt<AuthService>().setTapToPayEnabled(nextValue);
       if (res.isSuccess && res.statusCode == 200) {
         prefs.setTapToPayEnabled = nextValue;
         if (nextValue) {
@@ -49,12 +50,21 @@ class _TapToPayEnablePageState extends State<TapToPayEnablePage> {
         } else {
           prefs.setTapToPayAwarenessShown = false;
         }
+        if (res.data != null) {
+          getIt<SharedPreferences>().setUserData = res.data;
+        }
         Get.back(result: true);
       } else {
-        showError(res.message);
+        showError(res.message ?? 'Could not update Tap to Pay setting.');
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        showError('Tap to Pay setting could not be saved. Please update the app server and try again.');
+      } else {
+        showError(e.response?.data?['message']?.toString() ?? 'Could not update Tap to Pay setting.');
       }
     } catch (e) {
-      showError(e.toString());
+      showError('Could not update Tap to Pay setting.');
     }
   }
 

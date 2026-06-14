@@ -28,6 +28,7 @@ class MessagesPage extends GetItHook<MessagesController> {
           AppCustomAppbar(
             appTitle: AppStrings.T.messages,
             isHideBackButton: true,
+            enableKeyboardDismissButton: true,
             isPadding: true,
           ),
           const Gap(20),
