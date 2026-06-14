@@ -3,9 +3,10 @@ import 'package:marker/app/global/app_config.dart';
 
 /// In local dev the API often returns `http://localhost:3001/...` while the app
 /// calls `http://<LAN-IP>:3001`. Rewrite media URLs so images load on device/emulator.
-const bool _rewriteLocalMediaUrls = kDebugMode ||
-    AppConfig.apiEnv == 'dev' ||
-    AppConfig.apiEnv == 'staging';
+bool get _rewriteLocalMediaUrls =>
+    kDebugMode ||
+    AppConfig.resolvedApiEnv == 'dev' ||
+    AppConfig.resolvedApiEnv == 'staging';
 
 String resolveApiMediaUrl(String? url) {
   if (url == null || url.isEmpty) return '';

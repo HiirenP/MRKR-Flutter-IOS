@@ -35,6 +35,7 @@ class MainPage extends GetItHook<BaseHomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
         top: false,
         bottom: false,

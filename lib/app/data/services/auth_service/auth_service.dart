@@ -14,7 +14,7 @@ part 'auth_service.g.dart';
 Map<String, dynamic> deserializedynamic(Map<String, dynamic> json) => json;
 
 /// Add base Url here..
-@RestApi(parser: Parser.FlutterCompute, baseUrl: AppConfig.baseUrl)
+@RestApi(parser: Parser.FlutterCompute, baseUrl: AppConfig.restApiBaseUrl)
 @lazySingleton
 abstract class AuthService {
   @factoryMethod

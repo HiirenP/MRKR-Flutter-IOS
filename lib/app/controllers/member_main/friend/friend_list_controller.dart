@@ -25,6 +25,7 @@ class FriendListController extends GetxController {
   * ----- Start Use for send marker to friend -----
   * */
   TextEditingController searchController = TextEditingController();
+  final FocusNode searchFocusNode = FocusNode();
   RxInt selectedIndex = (-1).obs;
   RedeemedUpcomingListData? modelMarker;
 
@@ -154,6 +155,7 @@ class FriendListController extends GetxController {
 
   void onDismiss() {
     searchController.clear();
+    searchFocusNode.unfocus();
     selectedIndex.value = -1;
   }
 }

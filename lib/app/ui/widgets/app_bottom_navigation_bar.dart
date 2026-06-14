@@ -21,6 +21,8 @@ class AppBottomNavigationBar extends StatelessWidget {
   final RxInt counter;
   final RxBool? chatUnreadBadge;
 
+  static const Color _badgeColor = Colors.red;
+
   List<String> ownerIconsAll() {
     return [
       Assets.svg.menuHome,
@@ -68,6 +70,7 @@ class AppBottomNavigationBar extends StatelessWidget {
                 },
                 child: Stack(
                   alignment: Alignment.topRight,
+                  clipBehavior: Clip.none,
                   children: [
                     Padding(
                       padding: const AppEdgeInsets.h12(),
@@ -91,7 +94,7 @@ class AppBottomNavigationBar extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
                               child: CircleAvatar(
                                 radius: 5,
-                                backgroundColor: context.theme.colorScheme.onPrimary,
+                                backgroundColor: _badgeColor,
                               ),
                             );
                           }
@@ -106,11 +109,15 @@ class AppBottomNavigationBar extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 2),
                               child: CircleAvatar(
                                 radius: 10,
-                                backgroundColor: context.theme.colorScheme.onPrimary,
+                                backgroundColor: _badgeColor,
                                 child: Center(
                                   child: AppText(
                                     counter.value > 9 ? '9+' : counter.value.toString(),
-                                    style: context.textTheme.bodySmall?.copyWith(fontSize: 10),
+                                    style: context.textTheme.bodySmall?.copyWith(
+                                      fontSize: 10,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),

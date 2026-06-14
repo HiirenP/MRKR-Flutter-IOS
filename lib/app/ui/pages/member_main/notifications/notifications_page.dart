@@ -8,6 +8,7 @@ import 'package:marker/app/ui/widgets/custom_appbar.dart';
 import 'package:marker/app/ui/widgets/custom_button.dart';
 import 'package:marker/app/ui/widgets/custom_image_view.dart';
 import 'package:marker/app/ui/widgets/custom_text.dart';
+import 'package:marker/app/utils/constants/common_utils.dart';
 import 'package:marker/app/utils/constants/app_edge_insets.dart';
 import 'package:marker/app/utils/constants/app_strings.dart';
 import 'package:marker/app/utils/constants/date_utils.dart';
@@ -86,7 +87,7 @@ class NotificationsPage extends GetItHook<NotificationsController> {
                                           AppText(list.title ?? '', style: context.textTheme.bodyMedium),
                                           const Gap(2),
                                           ReadMoreText(
-                                            list.body ?? '',
+                                            formatNotificationBody(list.body),
                                             trimMode: TrimMode.Line,
                                             colorClickableText: context.theme.primaryColor,
                                             trimCollapsedText: ' ${AppStrings.T.showMore}',

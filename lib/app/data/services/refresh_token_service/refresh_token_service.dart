@@ -8,7 +8,7 @@ import 'package:retrofit/http.dart';
 
 part 'refresh_token_service.g.dart';
 
-@RestApi(parser: Parser.FlutterCompute, baseUrl: AppConfig.baseUrl)
+@RestApi(parser: Parser.FlutterCompute, baseUrl: AppConfig.restApiBaseUrl)
 @lazySingleton
 // ignore: one_member_abstracts
 abstract class RefreshTokenService {

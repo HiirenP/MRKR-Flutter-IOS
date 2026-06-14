@@ -14,32 +14,45 @@ class AppConfig {
     defaultValue: '192.168.1.5',
   );
 
-  /// `dev` or `staging` → dev API for release APK testing. Omit or `prod` for production.
-  static const String apiEnv = String.fromEnvironment('API_ENV', defaultValue: 'prod');
+  /// Override with `--dart-define=API_ENV=dev|staging|prod`.
+  /// When omitted: **debug** (simulator / `flutter run`) → dev API; **release** → prod.
+  static const String apiEnv = String.fromEnvironment('API_ENV', defaultValue: '');
+
+  static String get resolvedApiEnv {
+    if (apiEnv.isNotEmpty) return apiEnv;
+    if (kDebugMode) return 'dev';
+    return 'prod';
+  }
+
+  /// Retrofit `@RestApi` requires a compile-time constant; runtime URL is [baseUrl].
+  static const String restApiBaseUrl = '';
 
   static const String _prodApiOrigin = 'https://api.yourmarkerapp.com:3001';
   static const String _devApiOrigin = 'https://dev.api.yourmarkerapp.com:3002';
+  static const String _localApiOrigin = 'http://$localApiHost:3001';
 
-  static const String _releaseApiOrigin = apiEnv == 'dev' || apiEnv == 'staging'
+  static String get _releaseApiOrigin => resolvedApiEnv == 'dev' || resolvedApiEnv == 'staging'
       ? _devApiOrigin
       : _prodApiOrigin;
 
-  static const String socketUrl =
-      kDebugMode ? 'http://$localApiHost:3001' : _releaseApiOrigin;
+  /// Debug + API_ENV=prod (or unset prod in release) → local PC when not on dev/staging.
+  static String get socketUrl => resolvedApiEnv == 'dev' || resolvedApiEnv == 'staging'
+      ? _devApiOrigin
+      : (kDebugMode ? _localApiOrigin : _releaseApiOrigin);
 
-  static const String termsConditions = kDebugMode
-      ? 'http://$localApiHost:3001/public/T&C.html'
-      : '$_releaseApiOrigin/public/T&C.html';
+  static String get termsConditions => resolvedApiEnv == 'dev' || resolvedApiEnv == 'staging'
+      ? '$_devApiOrigin/public/T&C.html'
+      : (kDebugMode ? '$_localApiOrigin/public/T&C.html' : '$_prodApiOrigin/public/T&C.html');
   static const String tapToPayTerms =
       'https://www.apple.com/legal/internet-services/business-services/tap-to-pay-on-iphone/terms-en.html';
-  static const String aboutUs = kDebugMode
-      ? 'http://$localApiHost:3001/public/aboutUs.html'
-      : '$_releaseApiOrigin/public/aboutUs.html';
+  static String get aboutUs => resolvedApiEnv == 'dev' || resolvedApiEnv == 'staging'
+      ? '$_devApiOrigin/public/aboutUs.html'
+      : (kDebugMode ? '$_localApiOrigin/public/aboutUs.html' : '$_prodApiOrigin/public/aboutUs.html');
 
-  static const String privacyPolicy = kDebugMode
-      ? 'http://$localApiHost:3001/public/privacyPolicy.html'
-      : '$_releaseApiOrigin/public/privacyPolicy.html';
-  static const String baseUrl = '$socketUrl/api/';
+  static String get privacyPolicy => resolvedApiEnv == 'dev' || resolvedApiEnv == 'staging'
+      ? '$_devApiOrigin/public/privacyPolicy.html'
+      : (kDebugMode ? '$_localApiOrigin/public/privacyPolicy.html' : '$_prodApiOrigin/public/privacyPolicy.html');
+  static String get baseUrl => '$socketUrl/api/';
   static const int timeoutDuration = 30000;
   static const bool enableLogging = true; // Optional: Flag to enable/disable logging for debugging
 

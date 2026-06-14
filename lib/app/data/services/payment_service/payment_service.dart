@@ -17,7 +17,7 @@ Map<String, dynamic> deserializedynamic(Map<String, dynamic> json) => json;
 GetTerminalTokenModel deserializeGetTerminalTokenModel(Map<String, dynamic> json) => GetTerminalTokenModel.fromJson(json);
 
 /// Add base Url here..
-@RestApi(parser: Parser.FlutterCompute, baseUrl: AppConfig.baseUrl)
+@RestApi(parser: Parser.FlutterCompute, baseUrl: AppConfig.restApiBaseUrl)
 @lazySingleton
 abstract class PaymentService {
   @factoryMethod

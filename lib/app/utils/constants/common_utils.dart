@@ -9,6 +9,7 @@ import 'package:flutter_google_places_hoc081098/flutter_google_places_hoc081098.
 import 'package:flutter_google_places_hoc081098/google_maps_webservice_places.dart';
 import 'package:get/get.dart';
 import 'package:google_api_headers/google_api_headers.dart';
+import 'package:marker/app/utils/helpers/validations/validations.dart';
 import 'package:marker/app/utils/constants/app_colors.dart';
 import 'package:marker/app/utils/constants/app_constant.dart';
 import 'package:marker/app/utils/constants/app_strings.dart';
@@ -51,6 +52,18 @@ String hideText(String? text, {String? format, int limit = 3}) {
   final data = char * (text.length - limit) + text.substring(text.length - limit);
 
   return data;
+}
+
+String formatNotificationBody(String? body) {
+  if (body == null || body.isEmpty) return body ?? '';
+  return body.replaceAllMapped(
+    RegExp(r'\$(\d+(?:\.\d+)?)'),
+    (match) {
+      final amount = double.tryParse(match.group(1) ?? '');
+      if (amount == null) return match.group(0)!;
+      return AppValidations.getFormattedPrice(amount);
+    },
+  );
 }
 
 String formatDistance(double distance) {

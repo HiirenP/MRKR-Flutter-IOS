@@ -29,12 +29,14 @@ class MessagesPage extends GetItHook<MessagesController> {
             appTitle: AppStrings.T.messages,
             isHideBackButton: true,
             enableKeyboardDismissButton: true,
+            keyboardFocusNode: controller.searchFocusNode,
             isPadding: true,
           ),
           const Gap(20),
           TextInputField(
             type: InputType.text,
             controller: controller.searchController,
+            focusNode: controller.searchFocusNode,
             hintLabel: AppStrings.T.searchName,
             context: context,
             circularValue: 30.0.obs,
@@ -73,6 +75,7 @@ class MessagesPage extends GetItHook<MessagesController> {
                                 ChatPage.route(model, map: mapTemp)?.then(
                                   (value) {
                                     controller.mapCall.clear();
+                                    controller.clearUnreadForChat(index);
                                     if (value != null && value is MessagesDataModel) {
                                       controller.updateChatMessage(model: value, index: index);
                                     }
@@ -95,37 +98,61 @@ class MessagesPage extends GetItHook<MessagesController> {
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      PopupMenuButton<String>(
-                                        onSelected: (String result) {
-                                          if (result == 'block') {
-                                            controller.blockUserData(
-                                                blockId: model.userDetail?.sId ?? '', index: index);
-                                          } else if (result == 'report') {
-                                            controller.reportBottomSheet(
-                                                blockId: model.userDetail?.sId ?? '', index: index);
-                                          }
-                                        },
-                                        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                                          PopupMenuItem<String>(
-                                            value: 'block',
-                                            child: AppText(
-                                              'Block',
-                                              style: context.textTheme.bodyMedium,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          if ((model.unreadCount ?? 0) > 0)
+                                            Container(
+                                              margin: const EdgeInsets.only(right: 4),
+                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: Colors.red,
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: AppText(
+                                                (model.unreadCount ?? 0) > 9
+                                                    ? '9+'
+                                                    : '${model.unreadCount}',
+                                                style: context.textTheme.bodySmall?.copyWith(
+                                                  color: Colors.white,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                          PopupMenuItem<String>(
-                                            value: 'report',
-                                            child: AppText(
-                                              'Report',
-                                              style: context.textTheme.bodyMedium,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
+                                          PopupMenuButton<String>(
+                                            onSelected: (String result) {
+                                              if (result == 'block') {
+                                                controller.blockUserData(
+                                                    blockId: model.userDetail?.sId ?? '', index: index);
+                                              } else if (result == 'report') {
+                                                controller.reportBottomSheet(
+                                                    blockId: model.userDetail?.sId ?? '', index: index);
+                                              }
+                                            },
+                                            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                                              PopupMenuItem<String>(
+                                                value: 'block',
+                                                child: AppText(
+                                                  'Block',
+                                                  style: context.textTheme.bodyMedium,
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                              PopupMenuItem<String>(
+                                                value: 'report',
+                                                child: AppText(
+                                                  'Report',
+                                                  style: context.textTheme.bodyMedium,
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                            child: const Icon(Icons.more_vert),
                                           ),
                                         ],
-                                        child: const Icon(Icons.more_vert),
                                       ),
                                       if (model.lastMessage?.createdAt != null)
                                         AppText(

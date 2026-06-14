@@ -405,27 +405,27 @@ class ChatController extends GetxController {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextButton(
-                      onPressed: () => Get.back(result: 'everyone'),
-                      child: AppText(
-                        'Delete for everyone',
-                        style: context.textTheme.bodyMedium?.copyWith(
-                          color: context.colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
                     if (isSender)
                       TextButton(
-                        onPressed: () => Get.back(result: 'me'),
+                        onPressed: () => Get.back(result: 'everyone'),
                         child: AppText(
-                          'Delete for me',
+                          'Delete for everyone',
                           style: context.textTheme.bodyMedium?.copyWith(
                             color: context.colorScheme.primary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
+                    TextButton(
+                      onPressed: () => Get.back(result: 'me'),
+                      child: AppText(
+                        'Delete for me',
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          color: context.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                     TextButton(
                       onPressed: Get.back,
                       child: AppText(
@@ -447,6 +447,7 @@ class ChatController extends GetxController {
     if (scope == 'everyone') {
       emitDeleteMessage(messageId, scope: 'everyone');
     } else if (scope == 'me') {
+      removeMessageById(messageId);
       emitDeleteMessage(messageId, scope: 'me');
     }
   }
@@ -464,6 +465,13 @@ class ChatController extends GetxController {
 
   void _handlerMessageDeleted(userData) {
     if (userData is! Map<String, dynamic>) return;
+
+    final success = userData['success'];
+    if (success == 0 || success == '0') {
+      showError(userData['Message']?.toString() ?? 'Could not delete message.');
+      return;
+    }
+
     final resData = userData['resData'] as Map<String, dynamic>?;
     if (resData == null) return;
     final friendId = resData['friendId']?.toString() ?? '';

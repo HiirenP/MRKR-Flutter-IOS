@@ -24,6 +24,7 @@ class MessagesController extends GetxController {
   }
 
   TextEditingController searchController = TextEditingController();
+  final FocusNode searchFocusNode = FocusNode();
   final appConstant = AppConstant.instance;
   IO.Socket? socket;
   bool? isConnected;
@@ -91,10 +92,15 @@ class MessagesController extends GetxController {
     final map = userData['resData'] as Map<String, dynamic>?;
     if (map == null || map.isEmpty) return;
     final friendId = map['friendId']?.toString() ?? '';
+    if (friendId.isEmpty) return;
     final index = chatList.indexWhere((c) => c.userDetail?.friendId == friendId);
-    if (index < 0) return;
+    if (index < 0) {
+      page = 1;
+      emitUserList();
+      return;
+    }
     final item = chatList[index];
-    final lastMsg = map['lastMessage']?.toString() ?? '';
+    final lastMsg = map['message']?.toString() ?? map['lastMessage']?.toString() ?? '';
     if (lastMsg.isEmpty) {
       item.lastMessage = null;
     } else {
@@ -104,8 +110,24 @@ class MessagesController extends GetxController {
         messageType: map['messageType']?.toString(),
       );
     }
+
+    final currentUserId = getIt<SharedPreferences>().getUserId ?? '';
+    final receiverId = _resolveSocketUserId(map['receiverId']);
+    if (receiverId == currentUserId && map['unreadCount'] != null) {
+      item.unreadCount = num.tryParse('${map['unreadCount']}') ?? item.unreadCount;
+    }
+
     chatList[index] = item;
     sortingList();
+  }
+
+  String? _resolveSocketUserId(dynamic ref) {
+    if (ref == null) return null;
+    if (ref is String) return ref;
+    if (ref is Map<String, dynamic>) {
+      return ref['_id']?.toString();
+    }
+    return ref.toString();
   }
 
   void _handlerUserChat(userData) {
@@ -187,6 +209,7 @@ class MessagesController extends GetxController {
 
   void disposeRecords() {
     isLoading.value = false;
+    searchFocusNode.unfocus();
     socket?.off(appConstant.onSetChatUserlist);
     socket?.off(appConstant.onIncomingCall);
     socket?.off(appConstant.onSetUnreadChatThreadCount);
@@ -202,15 +225,24 @@ class MessagesController extends GetxController {
     sortingList();
   }
 
+  void clearUnreadForChat(int index) {
+    if (index < 0 || index >= chatList.length) return;
+    chatList[index].unreadCount = 0;
+    sortingList();
+  }
+
   void sortingList() {
-    /*
-    * Sort list because of latest message on top of the list
-    * */
     chatList.sort((a, b) {
+      final aUnread = (a.unreadCount ?? 0) > 0;
+      final bUnread = (b.unreadCount ?? 0) > 0;
+      if (aUnread != bUnread) {
+        return aUnread ? -1 : 1;
+      }
       final adate = a.lastMessage?.createdAt ?? '';
       final bdate = b.lastMessage?.createdAt ?? '';
       return bdate.compareTo(adate);
     });
+    chatList.refresh();
   }
 
   void onSearchFriend(String value) {

@@ -38,6 +38,7 @@ class FriendsPage extends GetItHook<FriendListController> {
             isSecondaryIcon: true,
             isHideBackButton: true,
             enableKeyboardDismissButton: true,
+            keyboardFocusNode: controller.searchFocusNode,
             isPadding: true,
             secondaryIconName: ImageView(Assets.svg.addProfile),
             onSecondaryTap: AddFriendsPage.route,
@@ -46,6 +47,7 @@ class FriendsPage extends GetItHook<FriendListController> {
           TextInputField(
             type: InputType.text,
             controller: controller.searchController,
+            focusNode: controller.searchFocusNode,
             hintLabel: AppStrings.T.searchByNameMobile,
             context: context,
             circularValue: 30.0.obs,

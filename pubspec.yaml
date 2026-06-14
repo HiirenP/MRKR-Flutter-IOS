@@ -1,7 +1,7 @@
 name: marker
 description: "A new Flutter project."
 
-version: 5.0.5+56
+version: 5.0.5+1
 
 environment:
   sdk: ^3.5.3

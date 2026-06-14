@@ -10,6 +10,14 @@
             "type": "dart"
         },
         {
+            "name": "marker (local PC API)",
+            "request": "launch",
+            "type": "dart",
+            "toolArgs": [
+                "--dart-define=API_ENV=prod"
+            ]
+        },
+        {
             "name": "marker (profile mode)",
             "request": "launch",
             "type": "dart",
