@@ -55,7 +55,7 @@ class ReviewList extends StatelessWidget {
                     trailing: Padding(
                       padding: const EdgeInsets.only(top: 5),
                       child: AppText(
-                        DateUtil.instance.dateDFormat(review.createdAt ?? ''),
+                        DateUtil.instance.dateDFormat(review.updatedAt ?? review.createdAt ?? ''),
                         style: context.textTheme.bodySmall?.copyWith(
                           color: context.colorScheme.secondaryFixedDim,
                         ),

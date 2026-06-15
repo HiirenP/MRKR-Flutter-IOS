@@ -102,6 +102,42 @@ class SearchDrinkDetailsPage extends GetItHook<SearchDrinkDetailsController> {
                                             ),
                                             style: context.textTheme.bodySmall,
                                           ),
+                                          const Gap(12),
+                                          GestureDetector(
+                                            behavior: HitTestBehavior.opaque,
+                                            onTap: () async {
+                                              final myReview = controller.drinkDetails.value.myReview;
+                                              final updated = await Get.toNamed(
+                                                AppRoutes.drinkReviewSubmitPage,
+                                                arguments: {
+                                                  'drinkId': controller.drinksId,
+                                                  'drinkName': controller.drinkDetails.value.name ?? '',
+                                                  'barId': controller.drinkDetails.value.barId ?? '',
+                                                  'barName': controller.barName ?? '',
+                                                  'reviewId': myReview?.sId,
+                                                  'review': myReview?.review,
+                                                  'reviewStars': myReview?.stars,
+                                                },
+                                              );
+                                              if (updated == true) {
+                                                await controller.getDrinkDetails();
+                                              }
+                                            },
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 6),
+                                              child: Obx(
+                                                () => AppText(
+                                                  controller.hasMyDrinkReview.value
+                                                      ? 'Edit Review'
+                                                      : AppStrings.T.writeReview,
+                                                  style: context.textTheme.bodySmall?.copyWith(
+                                                    color: context.colorScheme.primary,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ),

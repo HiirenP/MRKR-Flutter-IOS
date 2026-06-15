@@ -55,6 +55,31 @@ class PaymentsController extends GetxController {
   num platformFeesTotal = 0;
   List<PlatformFeeBreakdownItem> platformFeeBreakdown = [];
   bool isFriend = false;
+  Future<void>? _platformFeesRefreshFuture;
+
+  Future<void> refreshPlatformFees() async {
+    if (price <= 0) return;
+    _platformFeesRefreshFuture ??= _fetchPlatformFees();
+    try {
+      await _platformFeesRefreshFuture;
+    } finally {
+      _platformFeesRefreshFuture = null;
+    }
+  }
+
+  Future<void> _fetchPlatformFees() async {
+    try {
+      final response = await getIt<PaymentService>().memberPlatformFeePreview(price.toString());
+      final data = response['data'] as Map<String, dynamic>?;
+      if (data == null) return;
+      platformFeesTotal = (data['platformFeesTotal'] as num?) ?? 0;
+      platformFeeBreakdown = (data['breakdown'] as List<dynamic>? ?? [])
+          .map((e) => PlatformFeeBreakdownItem.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      debugPrint('refreshPlatformFees error: $e');
+    }
+  }
 
   Future<dynamic> payBottomSheet() async {
     return Get.bottomSheet(
@@ -76,7 +101,7 @@ class PaymentsController extends GetxController {
     );
   }
 
-  void paymentInit() {
+  Future<void> paymentInit() async {
     isFriend = false;
     if (Get.arguments != null) {
       if (Get.arguments is Map<String, dynamic>) {
@@ -98,14 +123,13 @@ class PaymentsController extends GetxController {
         }
       }
     }
-    refreshPlatformFees();
+    await refreshPlatformFees();
 
     StripTerminalController.tip = tip;
     StripTerminalController.barId = barId;
     StripTerminalController.drinkId = drinkId;
     StripTerminalController.price = price;
 
-    // Get userId from SharedPreferences
     userId = getIt<SharedPreferences>().getUserId ?? '';
     socket = appConstant.socket;
     final isConnected = socket?.connected;
@@ -124,20 +148,6 @@ class PaymentsController extends GetxController {
           }
         },
       );
-    }
-  }
-
-  Future<void> refreshPlatformFees() async {
-    try {
-      final response = await getIt<PaymentService>().memberPlatformFeePreview(price.toString());
-      final data = response['data'] as Map<String, dynamic>?;
-      if (data == null) return;
-      platformFeesTotal = (data['platformFeesTotal'] as num?) ?? 0;
-      platformFeeBreakdown = (data['breakdown'] as List<dynamic>? ?? [])
-          .map((e) => PlatformFeeBreakdownItem.fromJson(e as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      debugPrint('refreshPlatformFees error: $e');
     }
   }
 
@@ -219,6 +229,9 @@ class PaymentsController extends GetxController {
     userId = '';
     transactionId = '';
     price = 0;
+    platformFeesTotal = 0;
+    platformFeeBreakdown = [];
+    _platformFeesRefreshFuture = null;
     socket?.off(appConstant.onPaymentDone);
   }
 
@@ -227,6 +240,14 @@ class PaymentsController extends GetxController {
     if (tempTip.isEmpty) {
       tempTip = '0';
     }
+
+    Loading.show();
+    try {
+      await refreshPlatformFees();
+    } finally {
+      Loading.dismiss();
+    }
+
     return Get.bottomSheet(
       AppBottomSheet(
         title: AppStrings.T.paymentSummary,

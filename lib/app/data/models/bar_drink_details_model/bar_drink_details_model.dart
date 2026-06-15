@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:marker/app/data/models/bar_get_update_details_model/bar_get_update_details_model.dart';
 import 'package:marker/app/data/models/common/common.dart';
 import 'package:marker/app/data/models/drink_category_model/drink_category_model.dart';
 
@@ -40,6 +41,7 @@ class DrinkDetailsData {
     this.latestReviews,
     this.reviewStats,
     this.shareableLink,
+    this.myReview,
   });
 
   factory DrinkDetailsData.fromJson(Map<String, dynamic> json) {
@@ -57,6 +59,7 @@ class DrinkDetailsData {
   List<LatestReviews>? latestReviews;
   ReviewStats? reviewStats;
   String? shareableLink;
+  BarMyReview? myReview;
 
   Map<String, dynamic> toJson() => _$DrinkDetailsDataToJson(this);
 }
@@ -81,7 +84,11 @@ class LatestReviews {
 class UserId {
   UserId({this.sId, this.name, this.profile});
 
-  factory UserId.fromJson(Map<String, dynamic> json) => _$UserIdFromJson(json);
+  factory UserId.fromJson(Map<String, dynamic> json) {
+    final normalized = Map<String, dynamic>.from(json);
+    normalized['sId'] ??= normalized['_id']?.toString();
+    return _$UserIdFromJson(normalized);
+  }
   String? sId;
   String? name;
   String? profile;

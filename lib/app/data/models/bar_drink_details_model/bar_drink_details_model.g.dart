@@ -50,6 +50,9 @@ DrinkDetailsData _$DrinkDetailsDataFromJson(Map<String, dynamic> json) =>
           ? null
           : ReviewStats.fromJson(json['reviewStats'] as Map<String, dynamic>),
       shareableLink: json['shareableLink'] as String?,
+      myReview: json['myReview'] == null
+          ? null
+          : BarMyReview.fromJson(json['myReview'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$DrinkDetailsDataToJson(DrinkDetailsData instance) =>
@@ -64,6 +67,7 @@ Map<String, dynamic> _$DrinkDetailsDataToJson(DrinkDetailsData instance) =>
       'latestReviews': instance.latestReviews,
       'reviewStats': instance.reviewStats,
       'shareableLink': instance.shareableLink,
+      'myReview': instance.myReview,
     };
 
 LatestReviews _$LatestReviewsFromJson(Map<String, dynamic> json) =>

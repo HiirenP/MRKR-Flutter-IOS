@@ -131,7 +131,9 @@ class MarkerRedeemedPage extends GetItHook<DrinkReviewController> {
                           children: [
                             const Gap(25),
                             AppButton(
-                              label: AppStrings.T.submit,
+                              label: controller.isBarReview.value
+                                  ? (controller.hasExistingReview.value ? 'Update Review' : AppStrings.T.submit)
+                                  : (controller.hasExistingReview.value ? 'Update Review' : AppStrings.T.submit),
                               onPressed: () => controller.drinkReview(),
                             ),
                             const Gap(15),
@@ -176,12 +178,15 @@ class MarkerRedeemedPage extends GetItHook<DrinkReviewController> {
     if (Get.arguments != null) {
       controller.barName.value = '';
       controller.drinkName.value = '';
+      controller.fromMarkerRedeemed = true;
+      controller.isBarReview.value = false;
       final data = Get.arguments as RedeemedUpcomingListData;
       controller.drinkId = data.drinkId?.sId ?? '';
       controller.drinkName.value = data.drinkId?.name ?? '';
       controller.barId = data.barId?.sId ?? '';
       controller.barName.value = data.barId?.name ?? '';
       controller.transactionId = data.transactionId ?? '';
+      controller.loadMyDrinkReview();
     }
   }
 

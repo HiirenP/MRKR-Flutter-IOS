@@ -26,6 +26,7 @@ class SearchDrinkDetailsController extends GetxController with GetTickerProvider
 
   final drinksDetailsState = ApiState.initial().obs;
   Rx<DrinkDetailsData> drinkDetails = DrinkDetailsData().obs;
+  RxBool hasMyDrinkReview = false.obs;
 
   void tabBarViewInit() {
     tabController = TabController(vsync: this, length: 2);
@@ -38,6 +39,8 @@ class SearchDrinkDetailsController extends GetxController with GetTickerProvider
       onSuccess: (value) {
         if (value.statusCode == 200 && value.data != null) {
           drinkDetails.value = value.data ?? DrinkDetailsData();
+          final myReview = value.data?.myReview;
+          hasMyDrinkReview.value = myReview?.sId != null && myReview!.sId!.isNotEmpty;
           isFetch.value = true;
         }
       },
@@ -49,6 +52,7 @@ class SearchDrinkDetailsController extends GetxController with GetTickerProvider
 
   void disposeAll() {
     isFetch.value = false;
+    hasMyDrinkReview.value = false;
     tabController.dispose();
     drinksId = '';
     barName = '';

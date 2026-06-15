@@ -14,6 +14,7 @@ import 'package:marker/app/ui/pages/member_main/friend/add_friends_page.dart';
 import 'package:marker/app/ui/pages/member_main/friend/friends_page.dart';
 import 'package:marker/app/ui/pages/member_main/home/drinks_details_page.dart';
 import 'package:marker/app/ui/pages/member_main/home/bar_review_submit_page.dart';
+import 'package:marker/app/ui/pages/member_main/home/drink_review_submit_page.dart';
 import 'package:marker/app/ui/pages/member_main/home/home_page.dart';
 import 'package:marker/app/ui/pages/member_main/home/map_location_page.dart';
 import 'package:marker/app/ui/pages/member_main/home/map_near_by_bar_page.dart';
@@ -139,6 +140,10 @@ class AppPages {
     GetPage(
       name: AppRoutes.barReviewSubmitPage,
       page: () => const BarReviewSubmitPage(),
+    ),
+    GetPage(
+      name: AppRoutes.drinkReviewSubmitPage,
+      page: () => const DrinkReviewSubmitPage(),
     ),
 
     // sub screen of member home screen show near by bar location and show map and address

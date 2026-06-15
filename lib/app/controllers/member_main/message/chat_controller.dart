@@ -10,6 +10,7 @@ import 'package:marker/app/data/models/chat_user_model/chat_user_model.dart';
 import 'package:marker/app/data/models/messages_model/messages_model.dart';
 import 'package:marker/app/data/models/redeemed_upcoming_model/redeemed_upcoming_model.dart';
 import 'package:marker/app/data/services/member_service/member_service.dart';
+import 'package:marker/app/ui/pages/member_main/main_page/main_page.dart';
 import 'package:marker/app/ui/pages/member_main/message/video_call_page.dart';
 import 'package:marker/app/utils/constants/app_constant.dart';
 import 'package:marker/app/utils/constants/common_utils.dart';
@@ -63,6 +64,8 @@ class ChatController extends GetxController {
     messageList.clear();
     listGroup.value = [];
     isMoreData.value = false;
+    isBackOnce = false;
+    fromSendMarker = false;
     userId = getIt<SharedPreferences>().getUserId ?? '';
     isSend.value = false;
     isLoading.value = true;
@@ -547,6 +550,7 @@ class ChatController extends GetxController {
     callingState.value = ApiState.initial();
     callChannel = '';
     marker = null;
+    fromSendMarker = false;
     page = 1;
   }
 
@@ -556,10 +560,11 @@ class ChatController extends GetxController {
     }
     isBackOnce = true;
     keyboardHide();
-    /*if (fromSendMarker) {
-      await MainPage.route();
+    if (fromSendMarker) {
+      fromSendMarker = false;
+      await MainPage.route(selectedIndex: 2);
       return;
-    }*/
+    }
     if (messageList.isNotEmpty) {
       final model = messageList.last;
       Get.back(result: model);

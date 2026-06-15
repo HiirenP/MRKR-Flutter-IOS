@@ -1,6 +1,7 @@
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
+import 'package:get/get.dart';
 import 'package:marker/app/controllers/member_main/home/drink_details_controller.dart';
 import 'package:marker/app/data/models/search_drinks_model/search_drinks_model.dart';
 import 'package:marker/app/routes/app_routes.dart';
@@ -102,6 +103,44 @@ class DrinkDetailsView extends GetItHook<DrinkDetailsController> {
                                                     AppStrings.T.reviews(drink?.reviewStats?.total?.toString() ?? ''),
                                                     style: context.textTheme.bodySmall,
                                                   ),
+                                                  if (controller.isShow.value) ...[
+                                                    const Gap(12),
+                                                    GestureDetector(
+                                                      behavior: HitTestBehavior.opaque,
+                                                      onTap: () async {
+                                                        final myReview = controller.drinkData.value.myReview;
+                                                        final updated = await Get.toNamed(
+                                                          AppRoutes.drinkReviewSubmitPage,
+                                                          arguments: {
+                                                            'drinkId': controller.drinkId,
+                                                            'drinkName': drink?.name ?? '',
+                                                            'barId': controller.drinkData.value.barId ?? '',
+                                                            'barName': controller.barName.value,
+                                                            'reviewId': myReview?.sId,
+                                                            'review': myReview?.review,
+                                                            'reviewStars': myReview?.stars,
+                                                          },
+                                                        );
+                                                        if (updated == true) {
+                                                          await controller.getDrinkDetailsData();
+                                                        }
+                                                      },
+                                                      child: Padding(
+                                                        padding: const EdgeInsets.symmetric(vertical: 6),
+                                                        child: Obx(
+                                                          () => AppText(
+                                                            controller.hasMyDrinkReview.value
+                                                                ? 'Edit Review'
+                                                                : AppStrings.T.writeReview,
+                                                            style: context.textTheme.bodySmall?.copyWith(
+                                                              color: context.colorScheme.primary,
+                                                              fontWeight: FontWeight.w600,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ],
                                               ),
                                             ],

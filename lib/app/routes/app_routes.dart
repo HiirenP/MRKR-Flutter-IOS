@@ -36,6 +36,7 @@ class AppRoutes {
   static const String upcomingMarkerPage = '/upcoming_marker_page';
   static const String markerRedeemedPage = '/marker_redeemed_page';
   static const String barReviewSubmitPage = '/bar_review_submit_page';
+  static const String drinkReviewSubmitPage = '/drink_review_submit_page';
   static const String mapLocationPage = '/map_location_page';
   static const String mapMarkerPage = '/map_marker_page';
   static const String baseScreen = '/base_screen';

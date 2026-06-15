@@ -34,8 +34,11 @@ class ChatPage extends GetItHook<ChatController> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
+      canPop: false,
       onPopInvokedWithResult: (didPop, result) {
-        controller.onUserBack();
+        if (!didPop) {
+          controller.onUserBack();
+        }
       },
       child: FocusScope(
         child: Form(

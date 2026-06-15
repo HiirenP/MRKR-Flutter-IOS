@@ -45,6 +45,12 @@ class DrinkReviewData {
     } else if (barIdVal != null) {
       normalized['barId'] = barIdVal.toString();
     }
+    final drinkIdVal = normalized['drinkId'];
+    if (drinkIdVal is Map) {
+      normalized['drinkId'] = drinkIdVal['_id']?.toString() ?? drinkIdVal['sId']?.toString();
+    } else if (drinkIdVal != null) {
+      normalized['drinkId'] = drinkIdVal.toString();
+    }
     if (normalized['stars'] != null) {
       normalized['stars'] = (normalized['stars'] as num).toDouble();
     }

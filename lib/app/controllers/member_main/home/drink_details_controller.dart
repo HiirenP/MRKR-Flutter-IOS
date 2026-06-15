@@ -35,6 +35,7 @@ class DrinkDetailsController extends GetxController {
   TextEditingController enterAmountController = TextEditingController();
   RxList<PlatformFeeBreakdownItem> platformFeeBreakdown = <PlatformFeeBreakdownItem>[].obs;
   Rx<num> platformFeesTotal = 0.obs;
+  RxBool hasMyDrinkReview = false.obs;
 
   Future<void> getDrinkDetailsData() async {
     isDataFound.value = false;
@@ -45,7 +46,8 @@ class DrinkDetailsController extends GetxController {
         if (value.statusCode == 200 && value.data != null) {
           isDataFound.value = true;
           drinkData.value = value.data ?? DrinkDetailsData();
-          loadPlatformFees();
+          final myReview = value.data?.myReview;
+          hasMyDrinkReview.value = myReview?.sId != null && myReview!.sId!.isNotEmpty;
         }
       },
       onFailed: (value) {
@@ -53,6 +55,9 @@ class DrinkDetailsController extends GetxController {
         isDataFound.value = false;
       },
     );
+    if (isDataFound.value) {
+      await loadPlatformFees();
+    }
   }
 
   void onShareTap() {
@@ -88,6 +93,7 @@ class DrinkDetailsController extends GetxController {
   }
 
   Future<void> onNext({String price = '0'}) async {
+    await loadPlatformFees();
     final map = {
       'barId': drinkData.value.barId,
       'price': drinkData.value.price,
@@ -208,5 +214,6 @@ class DrinkDetailsController extends GetxController {
     drinkData.value = DrinkDetailsData();
     platformFeeBreakdown.clear();
     platformFeesTotal.value = 0;
+    hasMyDrinkReview.value = false;
   }
 }
