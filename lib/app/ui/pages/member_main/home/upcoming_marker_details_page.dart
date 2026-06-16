@@ -21,6 +21,7 @@ import 'package:marker/app/utils/constants/app_edge_insets.dart';
 import 'package:marker/app/utils/constants/app_strings.dart';
 import 'package:marker/app/utils/constants/common_utils.dart';
 import 'package:marker/app/utils/constants/date_utils.dart';
+import 'package:marker/app/utils/helpers/marker_display_util.dart';
 import 'package:marker/app/utils/helpers/extensions/extensions.dart';
 import 'package:marker/app/utils/helpers/getItHook/getit_hook.dart';
 import 'package:marker/gen/assets.gen.dart';
@@ -91,7 +92,7 @@ class UpcomingMarkerDetailsPage extends GetItHook<UpcomingMarkerDetailsControlle
                                       ListTile(
                                         contentPadding: EdgeInsets.zero,
                                         leading: ImageView(
-                                          drink.ownerId?.profile ?? '',
+                                          drink.holder?.profile ?? '',
                                           shape: BoxShape.circle,
                                           inner: ImageSize(height: 40, width: 40),
                                         ),
@@ -108,7 +109,7 @@ class UpcomingMarkerDetailsPage extends GetItHook<UpcomingMarkerDetailsControlle
                                                 style: context.textTheme.bodyMedium,
                                               ),
                                         title: AppText(
-                                          drink.ownerId?.name ?? '',
+                                          drink.holder?.name ?? '',
                                           style: context.textTheme.bodyMedium,
                                         ),
                                         subtitle: (drink.redeemedAt?.isNotEmpty ?? false)
@@ -146,7 +147,7 @@ class UpcomingMarkerDetailsPage extends GetItHook<UpcomingMarkerDetailsControlle
                                                 ],
                                               )
                                             : AppText(
-                                                '${DateUtil.instance.dateDFormat(drink.createdAt ?? '')} | ${DateUtil.instance.dateDFormat(drink.createdAt ?? '', format: DateUtil.instance.hhMMA)}',
+                                                '${DateUtil.instance.dateDFormat(drink.holderDate ?? '')} | ${DateUtil.instance.dateDFormat(drink.holderDate ?? '', format: DateUtil.instance.hhMMA)}',
                                                 style: context.textTheme.bodySmall?.copyWith(
                                                   color: context.colorScheme.secondaryContainer,
                                                 ),

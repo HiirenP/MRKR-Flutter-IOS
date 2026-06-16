@@ -15,6 +15,7 @@ import 'package:marker/app/ui/widgets/custom_text.dart';
 import 'package:marker/app/ui/widgets/custom_textfields.dart';
 import 'package:marker/app/utils/constants/app_edge_insets.dart';
 import 'package:marker/app/utils/constants/app_strings.dart';
+import 'package:marker/app/utils/helpers/marker_display_util.dart';
 import 'package:marker/app/utils/constants/common_utils.dart';
 import 'package:marker/app/utils/constants/date_utils.dart';
 import 'package:marker/app/utils/helpers/extensions/extensions.dart';
@@ -181,10 +182,28 @@ class ChatPage extends GetItHook<ChatController> {
                                                                                           const Gap(15),
                                                                                           Row(
                                                                                             children: [
+                                                                                              ImageView(
+                                                                                                messageModel.senderId?.profile ?? markerModel.holder?.profile ?? '',
+                                                                                                shape: BoxShape.circle,
+                                                                                                inner: ImageSize(height: 28, width: 28),
+                                                                                              ),
+                                                                                              const Gap(8),
                                                                                               Expanded(
-                                                                                                child: AppText(
-                                                                                                  markerModel.barId?.ownerId?.name ?? '',
-                                                                                                  style: context.textTheme.titleSmall,
+                                                                                                child: Column(
+                                                                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                                  children: [
+                                                                                                    AppText(
+                                                                                                      messageModel.senderId?.name ?? markerModel.holder?.name ?? '',
+                                                                                                      style: context.textTheme.titleSmall,
+                                                                                                    ),
+                                                                                                    if ((markerModel.holderDate ?? '').isNotEmpty)
+                                                                                                      AppText(
+                                                                                                        '${DateUtil.instance.dateDFormat(markerModel.holderDate ?? '')} | ${DateUtil.instance.dateDFormat(markerModel.holderDate ?? '', format: DateUtil.instance.hhMMA)}',
+                                                                                                        style: context.textTheme.bodySmall?.copyWith(
+                                                                                                          color: context.colorScheme.secondaryContainer,
+                                                                                                        ),
+                                                                                                      ),
+                                                                                                  ],
                                                                                                 ),
                                                                                               ),
                                                                                               AppText(
@@ -243,6 +262,15 @@ class ChatPage extends GetItHook<ChatController> {
                                                                       ),
                                                                     ],
                                                                   ),
+                                                                  if ((messageModel.reactions ?? const []).isNotEmpty)
+                                                                    Padding(
+                                                                      padding: const EdgeInsets.only(top: 4),
+                                                                      child: _MessageReactionsInline(
+                                                                        reactions: messageModel.reactions ?? const [],
+                                                                        currentUserId: controller.userId,
+                                                                        alignEnd: sender,
+                                                                      ),
+                                                                    ),
                                                                   // Only show time if it's the last message or if next message has different time
                                                                   Builder(
                                                                     builder: (context) {
@@ -329,6 +357,25 @@ class ChatPage extends GetItHook<ChatController> {
                                                         children: [
                                                           AppText(controller.marker?.drinkId?.name?.capitalize ?? '', style: context.textTheme.titleSmall),
                                                           const Gap(10),
+                                                          Row(
+                                                            children: [
+                                                              ImageView(
+                                                                controller.marker?.holder?.profile ?? '',
+                                                                shape: BoxShape.circle,
+                                                                inner: ImageSize(height: 20, width: 20),
+                                                              ),
+                                                              const Gap(5),
+                                                              Expanded(
+                                                                child: AppText(
+                                                                  controller.marker?.holder?.name ?? '',
+                                                                  style: context.textTheme.bodySmall?.copyWith(
+                                                                    color: context.colorScheme.secondaryContainer,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          const Gap(5),
                                                           Row(
                                                             children: [
                                                               ImageView(
@@ -524,5 +571,66 @@ class ChatPage extends GetItHook<ChatController> {
   @override
   void onDispose() {
     controller.disposeRecords();
+  }
+}
+
+class _MessageReactionsInline extends StatelessWidget {
+  const _MessageReactionsInline({
+    required this.reactions,
+    required this.currentUserId,
+    required this.alignEnd,
+  });
+
+  final List<MessageReaction> reactions;
+  final String currentUserId;
+  final bool alignEnd;
+
+  @override
+  Widget build(BuildContext context) {
+    final counts = <String, int>{};
+    String? mine;
+    for (final r in reactions) {
+      final emoji = r.emoji;
+      if (emoji == null || emoji.isEmpty) continue;
+      counts[emoji] = (counts[emoji] ?? 0) + 1;
+      if (r.userId == currentUserId) {
+        mine = emoji;
+      }
+    }
+    if (counts.isEmpty) return const SizedBox.shrink();
+
+    final chips = counts.entries
+        .map(
+          (e) => Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: (mine == e.key) ? context.colorScheme.onPrimary : context.colorScheme.secondary,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: context.colorScheme.secondaryContainer.withAlpha(40),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(e.key, style: const TextStyle(fontSize: 14)),
+                const SizedBox(width: 4),
+                AppText(
+                  '${e.value}',
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: context.colorScheme.secondaryFixedDim,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        )
+        .toList();
+
+    return Align(
+      alignment: alignEnd ? Alignment.centerRight : Alignment.centerLeft,
+      child: Wrap(spacing: 6, runSpacing: 6, children: chips),
+    );
   }
 }

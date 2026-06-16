@@ -198,17 +198,13 @@ class UpcomingMarkerDetailsController extends GetxController {
     await getIt<BarOwnerService>().verifyQRCode(requestData).handler(
       qrDetailsState,
       onSuccess: (value) {
-        if (value.statusCode == 200 && value.data != null) {
-          drinkData.value = value.data?.marker ?? RedeemedUpcomingListData();
-          if (value.data?.marker == null) {
-            if (!onceOpen) {
-              onceOpen = true;
-              markerNullBottomSheet(value.data?.originalBarName ?? '', value.data?.scannedBarName ?? '',
-                  value.data?.drinkName ?? '', value.data?.markerId ?? '');
-            }
-          } else {
-            isSuccess.value = true;
-          }
+        if (value.statusCode == 200 && value.data?.marker != null) {
+          drinkData.value = value.data!.marker!;
+          markerId = drinkData.value.sId ?? '';
+          isSuccess.value = true;
+        } else {
+          Get.back();
+          showError(value.message);
         }
       },
       onFailed: (value) {

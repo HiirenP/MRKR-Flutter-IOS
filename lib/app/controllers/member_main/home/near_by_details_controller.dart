@@ -2,7 +2,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:injectable/injectable.dart' as i;
 import 'package:marker/app/data/models/bar_drink_model/bar_drink_model.dart';
 import 'package:marker/app/data/models/bar_get_update_details_model/bar_get_update_details_model.dart';
+import 'package:marker/app/data/models/drink_category_model/drink_category_model.dart';
 import 'package:marker/app/data/services/member_service/member_service.dart';
+import 'package:marker/app/utils/helpers/drink_category_util.dart';
 import 'package:marker/app/utils/constants/common_utils.dart';
 import 'package:marker/app/utils/constants/date_utils.dart';
 import 'package:marker/app/utils/helpers/exception/exception.dart';
@@ -41,6 +43,9 @@ class NearByDetailsController extends GetxController with GetTickerProviderState
 
   Rx<BarGetUpdateData> barDetails = BarGetUpdateData().obs;
   RxList<BarDrinkData> drinkList = <BarDrinkData>[].obs;
+  RxList<DrinkCategoryData> drinkCategories = <DrinkCategoryData>[].obs;
+  RxString selectedCategoryId = ''.obs;
+  List<BarDrinkData> _allDrinks = [];
 
   void tabBarViewInit() {
     tabController = TabController(vsync: this, length: 2);
@@ -90,13 +95,47 @@ class NearByDetailsController extends GetxController with GetTickerProviderState
     ));
   }
 
+  Future<void> loadDrinkCategories() async {
+    try {
+      drinkCategories.value = await fetchDrinkCategoriesFromApi();
+    } catch (e) {
+      debugPrint('loadDrinkCategories error: $e');
+    }
+  }
+
+  void applyDrinkCategoryFilter() {
+    final selectedId = selectedCategoryId.value;
+    if (selectedId.isEmpty) {
+      drinkList.value = List<BarDrinkData>.from(_allDrinks);
+      return;
+    }
+    drinkList.value = _allDrinks
+        .where(
+          (drink) =>
+              drinkCategoryIdForFilter(
+                categoryId: drink.categoryId,
+                category: drink.category,
+              ) ==
+              selectedId,
+        )
+        .toList();
+  }
+
+  void onDrinkCategoryFilterChanged(String categoryId) {
+    selectedCategoryId.value = categoryId;
+    applyDrinkCategoryFilter();
+  }
+
   Future<void> getBarDetails(String? barId) async {
     await getIt<MemberService>().details(barId ?? '').handler(
       barDetailsState,
       onSuccess: (value) {
         if (value.isSuccess && value.data != null) {
           barDetails.value = value.data ?? BarGetUpdateData();
-          drinkList.value = value.data?.drinks ?? [];
+          _allDrinks = List<BarDrinkData>.from(value.data?.drinks ?? []);
+          selectedCategoryId.value = '';
+          applyDrinkCategoryFilter();
+          loadDrinkCategories();
           addAboutListData();
           selectedTab.value = true;
           isSuccess.value = true;
@@ -124,7 +163,11 @@ class NearByDetailsController extends GetxController with GetTickerProviderState
     aboutList = [];
     isSuccess.value = false;
     barDetails.value = BarGetUpdateData();
-    origin = Rx<LatLng>(const LatLng(0, 0));
-    markers = <Marker>[].obs;
+    drinkList.value = [];
+    _allDrinks = [];
+    drinkCategories.value = [];
+    selectedCategoryId.value = '';
+    origin.value = const LatLng(0, 0);
+    markers.value = [];
   }
 }

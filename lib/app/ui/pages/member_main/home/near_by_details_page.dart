@@ -13,6 +13,7 @@ import 'package:marker/app/ui/pages/member_main/home/review_page.dart';
 import 'package:marker/app/ui/widgets/custom_appbar.dart';
 import 'package:marker/app/ui/widgets/custom_button.dart';
 import 'package:marker/app/ui/widgets/custom_gap.dart';
+import 'package:marker/app/ui/widgets/drink_category_dropdown.dart';
 import 'package:marker/app/ui/widgets/custom_image_view.dart';
 import 'package:marker/app/utils/helpers/image_url_util.dart';
 import 'package:marker/app/ui/widgets/custom_text.dart';
@@ -294,70 +295,94 @@ class NearByDetailsPage extends GetItHook<NearByDetailsController> {
                               : const SizedBox(),
                         ),
                         Obx(
-                          () => controller.selectedTab.value && controller.drinkList.isNotEmpty
-                              ? GridView.builder(
-                                  padding: const AppEdgeInsets.all16(),
-                                  itemCount: controller.drinkList.length,
-                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2, crossAxisSpacing: 15, mainAxisSpacing: 15, mainAxisExtent: 150),
-                                  itemBuilder: (BuildContext context, int index) {
-                                    return GestureDetector(
-                                      //onTap: () => NearByDrinkDetailsPage.route(drinkId: controller.drinkList[index].sId),
-                                      onTap: () async {
-                                        debugPrint('drinkDetails------barId--------${controller.drinkList[index].sId}');
-                                        await DrinkDetailsView.route(
-                                            barId: controller.drinkList[index].sId, isShow: true, isFriend: controller.isFriend);
-                                      },
-
-                                      child: Stack(
-                                        alignment: Alignment.bottomCenter,
-                                        children: [
-                                          ImageView(
-                                            listImageUrl(
-                                              controller.drinkList[index].image,
-                                              thumbUrl: controller.drinkList[index].imageThumb,
-                                            ),
-                                            borderRadius: BorderRadius.circular(18),
-                                            inner: ImageSize(width: double.infinity, height: 175),
-                                          ),
-                                          Positioned(
-                                            left: 0,
-                                            right: 0,
-                                            child: Container(
-                                              width: 160,
-                                              height: 40,
-                                              decoration: BoxDecoration(
-                                                color: context.colorScheme.secondary,
-                                                borderRadius: const BorderRadius.only(
-                                                  bottomLeft: Radius.circular(18),
-                                                  bottomRight: Radius.circular(18),
-                                                ),
-                                              ),
-                                              child: Padding(
-                                                padding: const AppEdgeInsets.h8(),
-                                                child: Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child: AppText(
-                                                        controller.drinkList[index].name ?? '',
-                                                        style: context.textTheme.bodySmall,
-                                                      ),
-                                                    ),
-                                                    AppText(
-                                                      AppValidations.getFormattedPrice(controller.drinkList[index].price ?? ''),
-                                                      style: context.textTheme.bodyMedium,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                          () => !controller.selectedTab.value
+                              ? const SizedBox()
+                              : Column(
+                                  children: [
+                                    Padding(
+                                      padding: const AppEdgeInsets.h16(),
+                                      child: DrinkCategoryDropdown(
+                                        categories: controller.drinkCategories,
+                                        selectedId: controller.selectedCategoryId.value,
+                                        includeAllOption: true,
+                                        allOptionLabel: 'All categories',
+                                        onChanged: controller.onDrinkCategoryFilterChanged,
                                       ),
-                                    );
-                                  },
-                                )
-                              : EmptyScreen(title: AppStrings.T.drinkBarTitle),
+                                    ),
+                                    Expanded(
+                                      child: controller.drinkList.isEmpty
+                                          ? EmptyScreen(title: AppStrings.T.drinkBarTitle)
+                                          : GridView.builder(
+                                              padding: const AppEdgeInsets.all16(),
+                                              itemCount: controller.drinkList.length,
+                                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                                  crossAxisCount: 2,
+                                                  crossAxisSpacing: 15,
+                                                  mainAxisSpacing: 15,
+                                                  mainAxisExtent: 150),
+                                              itemBuilder: (BuildContext context, int index) {
+                                                return GestureDetector(
+                                                  onTap: () async {
+                                                    debugPrint(
+                                                        'drinkDetails------barId--------${controller.drinkList[index].sId}');
+                                                    await DrinkDetailsView.route(
+                                                      barId: controller.drinkList[index].sId,
+                                                      isShow: true,
+                                                      isFriend: controller.isFriend,
+                                                    );
+                                                  },
+                                                  child: Stack(
+                                                    alignment: Alignment.bottomCenter,
+                                                    children: [
+                                                      ImageView(
+                                                        listImageUrl(
+                                                          controller.drinkList[index].image,
+                                                          thumbUrl: controller.drinkList[index].imageThumb,
+                                                        ),
+                                                        borderRadius: BorderRadius.circular(18),
+                                                        inner: ImageSize(width: double.infinity, height: 175),
+                                                      ),
+                                                      Positioned(
+                                                        left: 0,
+                                                        right: 0,
+                                                        child: Container(
+                                                          width: 160,
+                                                          height: 40,
+                                                          decoration: BoxDecoration(
+                                                            color: context.colorScheme.secondary,
+                                                            borderRadius: const BorderRadius.only(
+                                                              bottomLeft: Radius.circular(18),
+                                                              bottomRight: Radius.circular(18),
+                                                            ),
+                                                          ),
+                                                          child: Padding(
+                                                            padding: const AppEdgeInsets.h8(),
+                                                            child: Row(
+                                                              children: [
+                                                                Expanded(
+                                                                  child: AppText(
+                                                                    controller.drinkList[index].name ?? '',
+                                                                    style: context.textTheme.bodySmall,
+                                                                  ),
+                                                                ),
+                                                                AppText(
+                                                                  AppValidations.getFormattedPrice(
+                                                                      controller.drinkList[index].price ?? ''),
+                                                                  style: context.textTheme.bodyMedium,
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                    ),
+                                  ],
+                                ),
                         )
                       ],
                     ),

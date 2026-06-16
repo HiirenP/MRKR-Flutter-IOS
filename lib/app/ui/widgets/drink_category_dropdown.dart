@@ -28,7 +28,7 @@ class DrinkCategoryDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (categories.isEmpty) {
+    if (categories.isEmpty && !includeAllOption) {
       return const SizedBox.shrink();
     }
 

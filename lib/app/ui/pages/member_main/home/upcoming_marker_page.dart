@@ -16,6 +16,7 @@ import 'package:marker/app/utils/constants/app_edge_insets.dart';
 import 'package:marker/app/utils/helpers/exporter.dart';
 import 'package:marker/app/utils/constants/app_strings.dart';
 import 'package:marker/app/utils/constants/date_utils.dart';
+import 'package:marker/app/utils/helpers/marker_display_util.dart';
 import 'package:marker/app/utils/helpers/extensions/extensions.dart';
 import 'package:marker/app/utils/helpers/getItHook/getit_hook.dart';
 import 'package:marker/gen/assets.gen.dart';
@@ -122,14 +123,14 @@ class UpcomingMarkerPage extends GetItHook<UpcomingMarkerController> {
                                                 Row(
                                                   children: [
                                                     ImageView(
-                                                      upcoming.ownerId?.profile ?? '',
+                                                      upcoming.holder?.profile ?? '',
                                                       shape: BoxShape.circle,
                                                       inner: ImageSize(height: 22, width: 22),
                                                     ),
                                                     const Gap(5),
                                                     Expanded(
                                                       child: AppText(
-                                                        upcoming.ownerId?.name ?? '',
+                                                        upcoming.holder?.name ?? '',
                                                         style: context.textTheme.bodySmall?.copyWith(
                                                           color: context.colorScheme.secondaryContainer,
                                                         ),
@@ -181,7 +182,7 @@ class UpcomingMarkerPage extends GetItHook<UpcomingMarkerController> {
                                                 if (!isRedeemed) ...[
                                                   const Gap(3),
                                                   AppText(
-                                                    '${DateUtil.instance.dateDFormat(upcoming.createdAt ?? '')} | ${DateUtil.instance.dateDFormat(upcoming.createdAt ?? '', format: DateUtil.instance.hhMMA)}',
+                                                    '${DateUtil.instance.dateDFormat(upcoming.holderDate ?? '')} | ${DateUtil.instance.dateDFormat(upcoming.holderDate ?? '', format: DateUtil.instance.hhMMA)}',
                                                     style: context.textTheme.bodySmall?.copyWith(
                                                       color: context.colorScheme.secondaryContainer,
                                                     ),

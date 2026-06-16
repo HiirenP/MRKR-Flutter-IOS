@@ -35,6 +35,7 @@ class MessagesDataModel {
     this.message,
     this.messageType,
     this.markerId,
+    this.reactions,
     this.isRead,
     this.isDeleted,
     this.createdAt,
@@ -52,10 +53,31 @@ class MessagesDataModel {
   String? message;
   String? messageType;
   RedeemedUpcomingListData? markerId;
+  List<MessageReaction>? reactions;
   bool? isRead;
   bool? isDeleted;
   String? createdAt;
   String? updatedAt;
 
   Map<String, dynamic> toJson() => _$MessagesDataModelToJson(this);
+}
+
+class MessageReaction {
+  MessageReaction({this.userId, this.emoji, this.reactedAt});
+
+  factory MessageReaction.fromJson(Map<String, dynamic> json) => MessageReaction(
+        userId: (json['userId'] is Map) ? (json['userId']['_id']?.toString()) : json['userId']?.toString(),
+        emoji: json['emoji']?.toString(),
+        reactedAt: json['reactedAt']?.toString(),
+      );
+
+  final String? userId;
+  final String? emoji;
+  final String? reactedAt;
+
+  Map<String, dynamic> toJson() => {
+        'userId': userId,
+        'emoji': emoji,
+        'reactedAt': reactedAt,
+      };
 }

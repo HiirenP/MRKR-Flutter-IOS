@@ -13,6 +13,7 @@ import 'package:marker/app/utils/constants/app_strings.dart';
 import 'package:marker/app/ui/widgets/marker_price_breakdown.dart';
 import 'package:marker/app/utils/constants/common_utils.dart';
 import 'package:marker/app/utils/constants/date_utils.dart';
+import 'package:marker/app/utils/helpers/marker_display_util.dart';
 import 'package:marker/app/utils/helpers/exception/exception.dart';
 import 'package:marker/app/utils/helpers/extensions/extensions.dart';
 import 'package:marker/app/utils/helpers/getItHook/getit_hook.dart';
@@ -151,13 +152,13 @@ class MarkerPage extends GetItHook<MarkerController> {
                                         Row(
                                           children: [
                                             ImageView(
-                                              list.ownerId?.profile ?? '',
+                                              list.holder?.profile ?? '',
                                               inner: ImageSize(height: 20, width: 20),
                                               shape: BoxShape.circle,
                                             ),
                                             const Gap(5),
                                             AppText(
-                                              list.ownerId?.name ?? '',
+                                              list.holder?.name ?? '',
                                               style: context.textTheme.bodySmall?.copyWith(
                                                 color: context.colorScheme.secondaryContainer,
                                               ),
@@ -181,7 +182,7 @@ class MarkerPage extends GetItHook<MarkerController> {
                                         if (controller.isSelected.value) ...[
                                           const Gap(3),
                                           AppText(
-                                            '${DateUtil.instance.dateDFormat(list.createdAt ?? '')} | ${DateUtil.instance.dateDFormat(list.createdAt ?? '', format: DateUtil.instance.hhMMA)}',
+                                            '${DateUtil.instance.dateDFormat(list.holderDate ?? '')} | ${DateUtil.instance.dateDFormat(list.holderDate ?? '', format: DateUtil.instance.hhMMA)}',
                                             style: context.textTheme.bodySmall?.copyWith(
                                               color: context.colorScheme.secondaryContainer,
                                             ),

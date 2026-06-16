@@ -135,6 +135,8 @@ class ChatController extends GetxController {
     socket!.off(appConstant.onIncomingCall);
     socket!.off(appConstant.onMessageDeleted);
     socket!.off(appConstant.onSetMessageDeleted);
+    socket!.off(appConstant.onMessageReactionUpdated);
+    socket!.off(appConstant.onSetMessageReaction);
     socket!.on(appConstant.onSetMessageList, _handlerMessageChat);
     socket!.on(appConstant.onSetNewMessage, _handlerNewMessage);
     socket!.on(appConstant.onSetUnreadChatThreadCount, _handlerUnreadCount);
@@ -142,10 +144,64 @@ class ChatController extends GetxController {
     socket!.on(appConstant.onIncomingCall, _handlerUpdateCall);
     socket!.on(appConstant.onMessageDeleted, _handlerMessageDeleted);
     socket!.on(appConstant.onSetMessageDeleted, _handlerMessageDeleted);
+    socket!.on(appConstant.onMessageReactionUpdated, _handlerReactionUpdated);
+    socket!.on(appConstant.onSetMessageReaction, _handlerReactionUpdated);
     socket!.onConnect((_) {
       isConnected = true;
       emitMessageList();
     });
+  }
+
+  void emitReactMessage(String messageId, String emoji) {
+    socket = appConstant.socket;
+    final friendId = friendData?.userDetail?.friendId ?? '';
+    if (socket?.connected == true && userId.isNotEmpty) {
+      socket!.emit(appConstant.emitReactMessage, {
+        'messageId': messageId,
+        'userId': userId,
+        'emoji': emoji,
+        'friendId': friendId,
+      });
+    }
+  }
+
+  void _handlerReactionUpdated(userData) {
+    if (userData is! Map<String, dynamic>) return;
+    final resData = userData['resData'];
+    if (resData is! Map<String, dynamic>) return;
+    final msgId = resData['messageId']?.toString() ?? '';
+    if (msgId.isEmpty) return;
+
+    final raw = resData['reactions'];
+    final reactions = <MessageReaction>[];
+    if (raw is List) {
+      for (final item in raw) {
+        if (item is Map<String, dynamic>) {
+          reactions.add(MessageReaction.fromJson(item));
+        } else if (item is Map) {
+          reactions.add(MessageReaction.fromJson(Map<String, dynamic>.from(item)));
+        }
+      }
+    }
+
+    void applyTo(List<MessagesDataModel> list) {
+      for (final m in list) {
+        if (m.sid == msgId) {
+          m.reactions = reactions;
+        }
+      }
+    }
+
+    applyTo(messageList);
+    for (var i = 0; i < listGroup.length; i++) {
+      final group = listGroup[i] as Map<String, dynamic>;
+      final list = group['list'] as List<MessagesDataModel>;
+      applyTo(list);
+      group['list'] = list;
+      listGroup[i] = group;
+    }
+    messageList.refresh();
+    listGroup.refresh();
   }
 
   void emitMessageList() {
@@ -380,76 +436,86 @@ class ChatController extends GetxController {
     }
     final isSender = messageModel.senderId?.sId == userId;
     final context = Get.context!;
-    final scope = await Get.dialog<String>(
-      Dialog(
-        backgroundColor: context.colorScheme.secondary,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 32),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(22, 22, 22, 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: AppText(
-                  'Delete message?',
-                  style: context.textTheme.titleMedium?.copyWith(
+    final action = await Get.bottomSheet<String>(
+      Container(
+        decoration: BoxDecoration(
+          color: context.colorScheme.secondary,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (!isSender) ...[
+              const SizedBox(height: 4),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: const ['👍', '❤️', '😂', '😮', '😢', '🙏', '👎', '🔥', '🎉', '🤔']
+                    .map(
+                      (e) => InkWell(
+                        onTap: () => Get.back(result: 'react:$e'),
+                        borderRadius: BorderRadius.circular(14),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: context.colorScheme.onPrimary,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Text(e, style: const TextStyle(fontSize: 18)),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+              const Gap(12),
+            ],
+            Divider(color: context.colorScheme.secondaryContainer.withAlpha(40), height: 1),
+            const Gap(8),
+            if (isSender)
+              ListTile(
+                onTap: () => Get.back(result: 'everyone'),
+                title: AppText(
+                  'Delete for everyone',
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: context.colorScheme.primary,
                     fontWeight: FontWeight.w600,
-                    color: context.colorScheme.onSecondary,
                   ),
                 ),
               ),
-              const Gap(18),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (isSender)
-                      TextButton(
-                        onPressed: () => Get.back(result: 'everyone'),
-                        child: AppText(
-                          'Delete for everyone',
-                          style: context.textTheme.bodyMedium?.copyWith(
-                            color: context.colorScheme.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    TextButton(
-                      onPressed: () => Get.back(result: 'me'),
-                      child: AppText(
-                        'Delete for me',
-                        style: context.textTheme.bodyMedium?.copyWith(
-                          color: context.colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: Get.back,
-                      child: AppText(
-                        'Cancel',
-                        style: context.textTheme.bodyMedium?.copyWith(
-                          color: context.colorScheme.onSecondary,
-                        ),
-                      ),
-                    ),
-                  ],
+            ListTile(
+              onTap: () => Get.back(result: 'me'),
+              title: AppText(
+                'Delete for me',
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-            ],
-          ),
+            ),
+            ListTile(
+              onTap: () => Get.back(),
+              title: AppText(
+                'Cancel',
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.colorScheme.onSecondary,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
-      barrierDismissible: true,
+      isScrollControlled: true,
     );
-    if (scope == 'everyone') {
+
+    if (!isSender && action != null && action.startsWith('react:')) {
+      emitReactMessage(messageId, action.substring('react:'.length));
+      return;
+    }
+
+    if (action == 'everyone') {
       emitDeleteMessage(messageId, scope: 'everyone');
-    } else if (scope == 'me') {
+    } else if (action == 'me') {
       removeMessageById(messageId);
       emitDeleteMessage(messageId, scope: 'me');
     }

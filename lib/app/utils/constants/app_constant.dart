@@ -96,6 +96,9 @@ class AppConstant {
   String emitDeleteMessage = 'deleteMessage';
   String onMessageDeleted = 'messageDeleted';
   String onSetMessageDeleted = 'setMessageDeleted';
+  String emitReactMessage = 'reactMessage';
+  String onMessageReactionUpdated = 'messageReactionUpdated';
+  String onSetMessageReaction = 'setMessageReaction';
   String onPaymentDone = 'paymentDone';
   String onIncomingCall = 'incomingCall';
   String onSetUnreadNotificationCount = 'setUnreadNotificationCount';

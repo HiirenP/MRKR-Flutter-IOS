@@ -17,6 +17,7 @@ import 'package:marker/app/ui/widgets/custom_image_view.dart';
 import 'package:marker/app/ui/widgets/custom_text.dart';
 import 'package:marker/app/utils/constants/common_utils.dart';
 import 'package:marker/app/utils/constants/date_utils.dart';
+import 'package:marker/app/utils/helpers/marker_display_util.dart';
 import 'package:marker/app/utils/helpers/image_url_util.dart';
 import 'package:marker/app/utils/helpers/exporter.dart';
 import 'package:marker/app/utils/helpers/extensions/extensions.dart';
@@ -222,7 +223,7 @@ class HomePage extends GetItHook<HomeController> {
                                           ),
                                         ),
                                         ImageView(
-                                          upcoming.ownerId?.profile ?? '',
+                                          upcoming.holder?.profile ?? '',
                                           shape: BoxShape.circle,
                                           inner: ImageSize(width: 22, height: 22),
                                         ),

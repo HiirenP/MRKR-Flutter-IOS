@@ -38,6 +38,9 @@ MessagesDataModel _$MessagesDataModelFromJson(Map<String, dynamic> json) =>
           ? null
           : RedeemedUpcomingListData.fromJson(
               json['markerId'] as Map<String, dynamic>),
+      reactions: (json['reactions'] as List<dynamic>?)
+          ?.map((e) => MessageReaction.fromJson(e as Map<String, dynamic>))
+          .toList(),
       isRead: json['isRead'] as bool?,
       isDeleted: json['isDeleted'] as bool?,
       createdAt: json['createdAt'] as String?,
@@ -53,6 +56,7 @@ Map<String, dynamic> _$MessagesDataModelToJson(MessagesDataModel instance) =>
       'message': instance.message,
       'messageType': instance.messageType,
       'markerId': instance.markerId,
+      'reactions': instance.reactions,
       'isRead': instance.isRead,
       'isDeleted': instance.isDeleted,
       'createdAt': instance.createdAt,

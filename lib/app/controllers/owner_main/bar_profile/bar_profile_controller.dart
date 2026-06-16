@@ -12,6 +12,7 @@ import 'package:marker/app/utils/constants/common_utils.dart';
 import 'package:marker/app/utils/constants/date_utils.dart';
 import 'package:marker/app/utils/helpers/exception/exception.dart';
 import 'package:marker/app/utils/helpers/extensions/extensions.dart';
+import 'package:marker/app/utils/helpers/drink_category_util.dart';
 import 'package:marker/app/utils/helpers/injectable/injectable.dart';
 import 'package:marker/gen/assets.gen.dart';
 import 'package:marker/model/common_model.dart';
@@ -87,6 +88,7 @@ class BarProfileController extends GetxController with GetTickerProviderStateMix
           isFetch.value = true;
           getBarDetailsData?.value = value.data ?? BarGetUpdateData();
           addAboutListData();
+          loadDrinkCategories();
         }
       },
       onFailed: (value) {
@@ -97,11 +99,7 @@ class BarProfileController extends GetxController with GetTickerProviderStateMix
 
   Future<void> loadDrinkCategories() async {
     try {
-      final response = await getIt<BarOwnerService>().drinkCategoriesList();
-      final data = response['data'] as List<dynamic>? ?? [];
-      drinkCategories.value = data
-          .map((e) => DrinkCategoryData.fromJson(e as Map<String, dynamic>))
-          .toList();
+      drinkCategories.value = await fetchDrinkCategoriesFromApi();
     } catch (e) {
       debugPrint('loadDrinkCategories error: $e');
     }
@@ -172,18 +170,22 @@ class BarProfileController extends GetxController with GetTickerProviderStateMix
     if (tab == 0) {
       return;
     }
+    await loadDrinkCategories();
     drinksListData.value = [];
     page = 1;
-    hasMoreData = true.obs;
+    isEndPage.value = false;
+    isDataEmpty.value = false;
+    isOnceS = false;
+    hasMoreData.value = false;
     await getDrinksListData();
   }
 
-  void updateInitEntry() {
+  Future<void> updateInitEntry() async {
     isEndPage.value = false;
     drinksListData.value = [];
     page = 1;
     selectedCategoryId.value = '';
-    loadDrinkCategories();
+    await loadDrinkCategories();
     scrollController.addListener(() {
       if (!isOnceS && scrollController.position.pixels == scrollController.position.maxScrollExtent) {
         if (isEndPage.value) {

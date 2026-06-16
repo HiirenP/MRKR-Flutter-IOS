@@ -184,24 +184,22 @@ class SearchDrinkController extends GetxController {
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Obx(
-              () => drinkCategories.isEmpty
-                  ? const SizedBox.shrink()
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AppText('Category', style: context.textTheme.bodyLarge),
-                        const Gap(10),
-                        DrinkCategoryDropdown(
-                          categories: drinkCategories,
-                          selectedId: selectedCategoryId.value,
-                          includeAllOption: true,
-                          allOptionLabel: 'All categories',
-                          onChanged: (value) => selectedCategoryId.value = value,
-                        ),
-                        const Gap(20),
-                      ],
-                    ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppText('Category', style: context.textTheme.bodyLarge),
+                const Gap(10),
+                Obx(
+                  () => DrinkCategoryDropdown(
+                    categories: drinkCategories,
+                    selectedId: selectedCategoryId.value,
+                    includeAllOption: true,
+                    allOptionLabel: 'All categories',
+                    onChanged: (value) => selectedCategoryId.value = value,
+                  ),
+                ),
+                const Gap(20),
+              ],
             ),
             AppText(AppStrings.T.rating, style: context.textTheme.bodyLarge),
             const Gap(10),
