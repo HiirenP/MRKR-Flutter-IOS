@@ -15,13 +15,13 @@ class AppConfig {
   );
 
   /// Override with `--dart-define=API_ENV=dev|staging|prod`.
-  /// When omitted: **debug** (simulator / `flutter run`) → dev API; **release** → prod.
+  /// When omitted, defaults to **dev** (safe for TestFlight/internal builds).
+  /// Use `--dart-define=API_ENV=prod` only for App Store / live production releases.
   static const String apiEnv = String.fromEnvironment('API_ENV', defaultValue: '');
 
   static String get resolvedApiEnv {
     if (apiEnv.isNotEmpty) return apiEnv;
-    if (kDebugMode) return 'dev';
-    return 'prod';
+    return 'dev';
   }
 
   /// Retrofit `@RestApi` requires a compile-time constant; runtime URL is [baseUrl].

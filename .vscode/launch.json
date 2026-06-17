@@ -10,6 +10,14 @@
             "type": "dart"
         },
         {
+            "name": "marker (dev API)",
+            "request": "launch",
+            "type": "dart",
+            "toolArgs": [
+                "--dart-define-from-file=dart_defines/dev.json"
+            ]
+        },
+        {
             "name": "marker (local PC API)",
             "request": "launch",
             "type": "dart",

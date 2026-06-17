@@ -32,6 +32,9 @@ Future<void> configuration({required Widget myApp}) async {
       final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
       await AppConfig.getCurrentVersionCode();
       await AppConfig.getDeviceName();
+      debugPrint(
+        'Marker API → env=${AppConfig.resolvedApiEnv} url=${AppConfig.socketUrl}',
+      );
       await getIt.init();
       AppLifecycleHandler().initialize();
       PaintingBinding.instance.imageCache.maximumSizeBytes = 200 << 20; // 200MB cache

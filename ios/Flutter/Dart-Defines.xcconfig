@@ -1,0 +1,4 @@
+// Bakes API_ENV=dev into iOS Xcode/Archive builds (base64 of "API_ENV=dev").
+// For App Store production: build with --dart-define-from-file=dart_defines/prod.json
+// or replace this value with QVBJX0VOVj1wcm9k (API_ENV=prod).
+DART_DEFINES=$(DART_DEFINES),QVBJX0VOVj1kZXY=
