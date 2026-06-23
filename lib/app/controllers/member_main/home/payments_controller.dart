@@ -25,6 +25,7 @@ import 'package:marker/app/utils/constants/common_utils.dart';
 import 'package:marker/app/utils/helpers/exception/exception.dart';
 import 'package:marker/app/utils/helpers/exporter.dart';
 import 'package:marker/app/utils/helpers/extensions/extensions.dart';
+import 'package:marker/app/utils/helpers/json_num_util.dart';
 import 'package:marker/gen/assets.gen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -72,7 +73,7 @@ class PaymentsController extends GetxController {
       final response = await getIt<PaymentService>().memberPlatformFeePreview(price.toString());
       final data = response['data'] as Map<String, dynamic>?;
       if (data == null) return;
-      platformFeesTotal = (data['platformFeesTotal'] as num?) ?? 0;
+      platformFeesTotal = readJsonNumOrZero(data['platformFeesTotal']);
       platformFeeBreakdown = (data['breakdown'] as List<dynamic>? ?? [])
           .map((e) => PlatformFeeBreakdownItem.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -110,7 +111,7 @@ class PaymentsController extends GetxController {
         drinkId = dats['drinkId'] as String;
         price = dats['price'] as num;
         tip = dats['tip'] as String;
-        platformFeesTotal = (dats['platformFeesTotal'] as num?) ?? 0;
+        platformFeesTotal = readJsonNumOrZero(dats['platformFeesTotal']);
         if (dats['platformFeeBreakdown'] is List) {
           platformFeeBreakdown = (dats['platformFeeBreakdown'] as List)
               .map((e) => e is PlatformFeeBreakdownItem
@@ -164,7 +165,11 @@ class PaymentsController extends GetxController {
       payState,
       onSuccess: (value) {
         if (value.statusCode == 200 && value.data != null) {
-          PrivacyPolicyPage.route(AppStrings.T.payment, url: value.data?.callback);
+          PrivacyPolicyPage.route(
+            AppStrings.T.payment,
+            url: value.data?.callback,
+            fullScreenWebView: true,
+          );
         }
       },
       onFailed: (value) {

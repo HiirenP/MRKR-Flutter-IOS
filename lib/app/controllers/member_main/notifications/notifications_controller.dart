@@ -30,6 +30,8 @@ class NotificationsController extends GetxController {
   final respondMarkerState = ApiState.initial().obs;
   RxList<NotificationsListData> notificationsList =
       <NotificationsListData>[].obs;
+  RxBool isSelectionMode = false.obs;
+  final RxSet<String> selectedNotificationIds = <String>{}.obs;
   int totalRecord = 0;
   final appConstant = AppConstant.instance;
   IO.Socket? socket;
@@ -110,7 +112,85 @@ class NotificationsController extends GetxController {
     hasMoreData = false.obs;
     isDataEmpty = false.obs;
     isEndPage = false.obs;
+    isSelectionMode.value = false;
+    selectedNotificationIds.clear();
     notificationsList.value = [];
+  }
+
+  void toggleSelectionMode() {
+    if (isSelectionMode.value) {
+      exitSelectionMode();
+      return;
+    }
+    isSelectionMode.value = true;
+  }
+
+  void exitSelectionMode() {
+    isSelectionMode.value = false;
+    selectedNotificationIds.clear();
+  }
+
+  void toggleNotificationSelection(String? notificationId) {
+    if (notificationId == null || notificationId.isEmpty) {
+      return;
+    }
+    if (selectedNotificationIds.contains(notificationId)) {
+      selectedNotificationIds.remove(notificationId);
+    } else {
+      selectedNotificationIds.add(notificationId);
+    }
+  }
+
+  void selectAllNotifications() {
+    selectedNotificationIds
+      ..clear()
+      ..addAll(
+        notificationsList.map((item) => item.sId).whereType<String>(),
+      );
+  }
+
+  bool isNotificationSelected(String? notificationId) {
+    return notificationId != null && selectedNotificationIds.contains(notificationId);
+  }
+
+  Future<void> deleteSelectedNotifications({bool deleteAll = false}) async {
+    if (!deleteAll && selectedNotificationIds.isEmpty) {
+      return;
+    }
+
+    notificationState.value = LoadingState();
+
+    final payload = deleteAll
+        ? {'deleteAll': true}
+        : {'notificationIds': selectedNotificationIds.toList()};
+
+    await getIt<BarOwnerService>().deleteNotification(payload).handler(
+      notificationState,
+      isLoading: true,
+      onSuccess: (value) {
+        if (value.statusCode == 200 && value.isSuccess) {
+          if (deleteAll) {
+            notificationsList.clear();
+            isDataEmpty.value = true;
+          } else {
+            notificationsList.removeWhere(
+              (item) => selectedNotificationIds.contains(item.sId),
+            );
+            if (notificationsList.isEmpty) {
+              isDataEmpty.value = true;
+            }
+          }
+          exitSelectionMode();
+          getIt<BaseHomeController>().notificationCount.value = 0;
+          if (value.message.isNotEmpty) {
+            showSuccess(value.message);
+          }
+        }
+      },
+      onFailed: (value) {
+        showError(value.error.description);
+      },
+    );
   }
 
   Future<void> acceptFriendRequest(NotificationsListData list,

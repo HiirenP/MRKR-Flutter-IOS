@@ -3,6 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:marker/app/data/models/bar_drink_model/bar_drink_model.dart';
 import 'package:marker/app/data/models/bar_get_update_details_model/bar_get_update_details_model.dart';
 import 'package:marker/app/data/models/common/common.dart';
+import 'package:marker/app/utils/helpers/json_num_util.dart';
 
 part 'redeemed_upcoming_model.g.dart';
 
@@ -179,7 +180,12 @@ class PlatformFeeBreakdownItem {
   PlatformFeeBreakdownItem({this.name, this.percentage, this.amount, this.chargeType});
 
   factory PlatformFeeBreakdownItem.fromJson(Map<String, dynamic> json) =>
-      _$PlatformFeeBreakdownItemFromJson(json);
+      PlatformFeeBreakdownItem(
+        name: json['name'] as String?,
+        percentage: readJsonNum(json['percentage']),
+        amount: readJsonNum(json['amount']),
+        chargeType: json['chargeType'] as String?,
+      );
 
   String? name;
   num? percentage;

@@ -9,6 +9,7 @@ import 'package:marker/app/ui/widgets/custom_bottom_sheet.dart';
 import 'package:marker/app/ui/widgets/custom_image_view.dart';
 import 'package:marker/app/ui/widgets/custom_textfields.dart';
 import 'package:marker/app/utils/constants/common_utils.dart';
+import 'package:marker/app/utils/helpers/json_num_util.dart';
 import 'package:marker/app/utils/helpers/exception/exception.dart';
 import 'package:marker/app/utils/helpers/exporter.dart';
 import 'package:marker/gen/assets.gen.dart';
@@ -34,7 +35,7 @@ class DrinkDetailsController extends GetxController {
   bool isGoBack = false;
   TextEditingController enterAmountController = TextEditingController();
   RxList<PlatformFeeBreakdownItem> platformFeeBreakdown = <PlatformFeeBreakdownItem>[].obs;
-  Rx<num> platformFeesTotal = 0.obs;
+  final Rx<num> platformFeesTotal = Rx<num>(0);
   RxBool hasMyDrinkReview = false.obs;
 
   Future<void> getDrinkDetailsData() async {
@@ -80,14 +81,14 @@ class DrinkDetailsController extends GetxController {
       final response = await getIt<PaymentService>().memberPlatformFeePreview(drinkPrice.toString());
       final data = response['data'] as Map<String, dynamic>?;
       if (data == null) return;
-      platformFeesTotal.value = (data['platformFeesTotal'] as num?) ?? 0;
+      platformFeesTotal.value = readJsonNumOrZero(data['platformFeesTotal']);
       final breakdown = (data['breakdown'] as List<dynamic>? ?? [])
           .map((e) => PlatformFeeBreakdownItem.fromJson(e as Map<String, dynamic>))
           .toList();
       platformFeeBreakdown.value = breakdown;
     } catch (e) {
       debugPrint('loadPlatformFees error: $e');
-      platformFeesTotal.value = 0;
+      platformFeesTotal.value = 0.0;
       platformFeeBreakdown.clear();
     }
   }
@@ -213,7 +214,7 @@ class DrinkDetailsController extends GetxController {
     isDataFound.value = false;
     drinkData.value = DrinkDetailsData();
     platformFeeBreakdown.clear();
-    platformFeesTotal.value = 0;
+    platformFeesTotal.value = 0.0;
     hasMyDrinkReview.value = false;
   }
 }

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:injectable/injectable.dart' as i;
 import 'package:marker/app/global/app_config.dart';
+import 'package:marker/app/controllers/member_main/message/messages_controller.dart';
 import 'package:marker/app/ui/pages/member_main/friend/friends_page.dart';
 import 'package:marker/app/ui/pages/member_main/home/home_page.dart';
 import 'package:marker/app/ui/pages/member_main/message/messages_page.dart';
@@ -27,6 +28,7 @@ class BaseHomeController extends GetxController {
   List<String> baseList = [];
   RxInt selectedIndex = 0.obs;
   RxInt notificationCount = 0.obs;
+  RxInt unreadChatThreadCount = 0.obs;
   RxBool hasUnreadChat = false.obs;
   bool isOnce = false;
   bool _socketConnecting = false;
@@ -59,11 +61,14 @@ class BaseHomeController extends GetxController {
     }
     if (index == 2) {
       hasUnreadChat.value = false;
+      unreadChatThreadCount.value = 0;
+      getIt<MessagesController>().refreshChatListIfNeeded();
     }
   }
 
   void applyUnreadChatThreadCount(dynamic count) {
     final parsed = int.tryParse('$count') ?? 0;
+    unreadChatThreadCount.value = parsed;
     hasUnreadChat.value = parsed > 0;
   }
 

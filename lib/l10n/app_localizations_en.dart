@@ -672,6 +672,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notification => 'Notification';
 
   @override
+  String get select => 'Select';
+
+  @override
+  String get selectAll => 'Select All';
+
+  @override
+  String get deleteSelected => 'Delete Selected';
+
+  @override
+  String get deleteAll => 'Delete All';
+
+  @override
+  String get clearSelectedChats => 'Clear Selected';
+
+  @override
+  String get clearAllChats => 'Clear All Chats';
+
+  @override
+  String get clearChatConfirm =>
+      'Clear chat history for the selected conversations? This only removes messages on your device.';
+
+  @override
+  String get clearAllChatsConfirm =>
+      'Clear chat history for all conversations? This only removes messages on your device.';
+
+  @override
   String get changePassword => 'Change Password';
 
   @override

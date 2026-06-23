@@ -1402,6 +1402,54 @@ abstract class AppLocalizations {
   /// **'Notification'**
   String get notification;
 
+  /// No description provided for @select.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get select;
+
+  /// No description provided for @selectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get selectAll;
+
+  /// No description provided for @deleteSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Selected'**
+  String get deleteSelected;
+
+  /// No description provided for @deleteAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete All'**
+  String get deleteAll;
+
+  /// No description provided for @clearSelectedChats.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Selected'**
+  String get clearSelectedChats;
+
+  /// No description provided for @clearAllChats.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All Chats'**
+  String get clearAllChats;
+
+  /// No description provided for @clearChatConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear chat history for the selected conversations? This only removes messages on your device.'**
+  String get clearChatConfirm;
+
+  /// No description provided for @clearAllChatsConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear chat history for all conversations? This only removes messages on your device.'**
+  String get clearAllChatsConfirm;
+
   /// No description provided for @changePassword.
   ///
   /// In en, this message translates to:

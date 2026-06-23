@@ -152,21 +152,34 @@ class ChatController extends GetxController {
     });
   }
 
+  String _resolveUserId() {
+    if (userId.isNotEmpty) return userId;
+    userId = getIt<SharedPreferences>().getUserId ?? '';
+    return userId;
+  }
+
   void emitReactMessage(String messageId, String emoji) {
     socket = appConstant.socket;
     final friendId = friendData?.userDetail?.friendId ?? '';
-    if (socket?.connected == true && userId.isNotEmpty) {
+    final currentUserId = _resolveUserId();
+    if (messageId.isEmpty || emoji.isEmpty) return;
+    if (socket?.connected == true && currentUserId.isNotEmpty) {
       socket!.emit(appConstant.emitReactMessage, {
         'messageId': messageId,
-        'userId': userId,
+        'userId': currentUserId,
         'emoji': emoji,
-        'friendId': friendId,
+        if (friendId.isNotEmpty) 'friendId': friendId,
       });
     }
   }
 
   void _handlerReactionUpdated(userData) {
     if (userData is! Map<String, dynamic>) return;
+    final success = userData['success'];
+    if (success != null && success.toString() == '0') {
+      showError(userData['Message']?.toString() ?? 'Could not update reaction.');
+      return;
+    }
     final resData = userData['resData'];
     if (resData is! Map<String, dynamic>) return;
     final msgId = resData['messageId']?.toString() ?? '';
@@ -212,12 +225,18 @@ class ChatController extends GetxController {
     isConnected = true;
     debugPrint('<<---emitMessageList--->>');
     final friendId = friendData?.userDetail?.friendId ?? '';
+    final currentUserId = _resolveUserId();
     if (friendId.isEmpty) {
       isLoading.value = false;
       showError('Unable to open chat. Missing friend id.');
       return;
     }
-    final userData = <String, dynamic>{'viewerUserId': userId, 'friendId': friendId, 'page': page, 'limit': '30'};
+    if (currentUserId.isEmpty) {
+      isLoading.value = false;
+      showError('Unable to open chat. Please sign in again.');
+      return;
+    }
+    final userData = <String, dynamic>{'viewerUserId': currentUserId, 'friendId': friendId, 'page': page, 'limit': '30'};
     socket!.emit(appConstant.emitGetMessageList, userData);
   }
 
@@ -238,12 +257,19 @@ class ChatController extends GetxController {
     }
     isConnected = true;
     final date = DateUtil.instance.currentDDateFormat();
+    final currentUserId = _resolveUserId();
+    final receiverId = friendData?.userDetail?.sId ?? '';
+    final friendId = friendData?.userDetail?.friendId ?? '';
+    if (currentUserId.isEmpty || receiverId.isEmpty || friendId.isEmpty) {
+      showError('Unable to send message. Chat session is invalid.');
+      return;
+    }
 
     final userData = <String, dynamic>{
       'message': message,
-      'senderId': userId,
-      'receiverId': friendData?.userDetail?.sId ?? '',
-      'friendId': friendData?.userDetail?.friendId ?? '',
+      'senderId': currentUserId,
+      'receiverId': receiverId,
+      'friendId': friendId,
       'messageType': type,
       'createdAt': date,
       'markerId': markerId.value.isNotEmpty ? markerId.value : null,
@@ -523,10 +549,12 @@ class ChatController extends GetxController {
 
   void emitDeleteMessage(String messageId, {String scope = 'everyone'}) {
     socket = appConstant.socket;
-    if (socket?.connected == true && userId.isNotEmpty) {
+    final currentUserId = _resolveUserId();
+    if (messageId.isEmpty) return;
+    if (socket?.connected == true && currentUserId.isNotEmpty) {
       socket!.emit(appConstant.emitDeleteMessage, {
         'messageId': messageId,
-        'userId': userId,
+        'userId': currentUserId,
         'scope': scope,
       });
     }

@@ -391,7 +391,8 @@ class HomePage extends GetItHook<HomeController> {
     await controller.getUserData();
     final prefs = await SharedPreferences.getInstance();
     await prefs.reload();
-    if (!prefs.getTapToPayAwarenessShown && Platform.isIOS) {
+    final isTapToPayEnabled = prefs.getTapToPayEnabled;
+    if (!prefs.getTapToPayAwarenessShown && Platform.isIOS && !isTapToPayEnabled) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await Get.bottomSheet(
           AppBottomSheet(

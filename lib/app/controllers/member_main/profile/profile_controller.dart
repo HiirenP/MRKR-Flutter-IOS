@@ -64,6 +64,7 @@ class ProfileController extends GetxController {
   RxString dialCode = '+91'.obs;
   String flag = '';
   RxString imagePath = ''.obs;
+  RxBool isFullScreenWebView = false.obs;
 
   @override
   void onInit() {
@@ -201,10 +202,10 @@ class ProfileController extends GetxController {
     );
   }
 
-  void addWebView({String? link}) {
+  void addWebView({String? link, bool isPayment = false}) {
     webViewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.transparent)
+      ..setBackgroundColor(isPayment ? Colors.white : Colors.transparent)
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (int progress) {

@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:marker/app/data/models/bar_drink_details_model/bar_drink_details_model.dart';
 import 'package:marker/app/data/models/common/common.dart';
 import 'package:marker/app/data/models/redeemed_upcoming_model/redeemed_upcoming_model.dart';
+import 'package:marker/app/utils/helpers/json_num_util.dart';
 
 part 'transaction_history_model.g.dart';
 
@@ -104,7 +105,7 @@ class TransactionWithdrawalHistoryListData {
     item.basePrice = normalized['basePrice'] as num?;
     item.tip = normalized['tip'] as num?;
     item.markerTotal = normalized['markerTotal'] as num?;
-    item.platformFeesTotal = normalized['platformFeesTotal'] as num?;
+    item.platformFeesTotal = readJsonNum(normalized['platformFeesTotal']);
     item.amountPaid = normalized['amountPaid'] as num?;
     item.platformFeeBreakdown = _parseFeeItems(normalized['platformFeeBreakdown']);
     item.serviceChargeBreakdown = _parseFeeItems(normalized['serviceChargeBreakdown']);
@@ -202,7 +203,12 @@ class TransactionPlatformFeeItem {
   TransactionPlatformFeeItem({this.name, this.percentage, this.amount, this.chargeType});
 
   factory TransactionPlatformFeeItem.fromJson(Map<String, dynamic> json) =>
-      _$TransactionPlatformFeeItemFromJson(json);
+      TransactionPlatformFeeItem(
+        name: json['name'] as String?,
+        percentage: readJsonNum(json['percentage']),
+        amount: readJsonNum(json['amount']),
+        chargeType: json['chargeType'] as String?,
+      );
 
   String? name;
   num? percentage;

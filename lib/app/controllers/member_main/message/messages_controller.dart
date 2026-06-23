@@ -34,6 +34,9 @@ class MessagesController extends GetxController {
   RxList<ChatDataModel> chatList = <ChatDataModel>[].obs;
   RxBool isEmptyData = false.obs;
   RxBool isLoading = false.obs;
+  RxBool isSelectionMode = false.obs;
+  RxBool isClearingChat = false.obs;
+  final RxSet<String> selectedFriendIds = <String>{}.obs;
   Map<String, dynamic> mapCall = <String, dynamic>{}.obs;
   final searchState = ApiState.initial().obs;
 
@@ -65,10 +68,12 @@ class MessagesController extends GetxController {
     socket!.off(appConstant.onIncomingCall);
     socket!.off(appConstant.onSetUnreadChatThreadCount);
     socket!.off(appConstant.onUpdateChatList);
+    socket!.off(appConstant.onSetChatCleared);
     socket!.on(appConstant.onSetChatUserlist, _handlerUserChat);
     socket!.on(appConstant.onIncomingCall, _handlerUpdateCall);
     socket!.on(appConstant.onSetUnreadChatThreadCount, _handlerUnreadChatBadge);
     socket!.on(appConstant.onUpdateChatList, _handlerChatListUpdate);
+    socket!.on(appConstant.onSetChatCleared, _handlerChatCleared);
     socket!.onConnect((_) {
       isConnected = true;
       if (chatList.isEmpty) {
@@ -85,6 +90,14 @@ class MessagesController extends GetxController {
         getIt<BaseHomeController>().applyUnreadChatThreadCount(resData['count']);
       }
     }
+  }
+
+  int get totalUnreadMessageCount =>
+      chatList.fold<int>(0, (sum, chat) => sum + (chat.unreadCount ?? 0).toInt());
+
+  void refreshChatListIfNeeded() {
+    page = 1;
+    emitUserList();
   }
 
   void _handlerChatListUpdate(userData) {
@@ -113,8 +126,15 @@ class MessagesController extends GetxController {
 
     final currentUserId = getIt<SharedPreferences>().getUserId ?? '';
     final receiverId = _resolveSocketUserId(map['receiverId']);
-    if (receiverId == currentUserId && map['unreadCount'] != null) {
-      item.unreadCount = num.tryParse('${map['unreadCount']}') ?? item.unreadCount;
+    final senderId = _resolveSocketUserId(map['senderId']);
+    if (receiverId == currentUserId) {
+      if (map['unreadCount'] != null) {
+        item.unreadCount = num.tryParse('${map['unreadCount']}') ?? item.unreadCount;
+      } else if (senderId != null && senderId != currentUserId) {
+        item.unreadCount = (item.unreadCount ?? 0) + 1;
+      }
+    } else if (senderId == currentUserId) {
+      item.unreadCount = 0;
     }
 
     chatList[index] = item;
@@ -209,13 +229,127 @@ class MessagesController extends GetxController {
 
   void disposeRecords() {
     isLoading.value = false;
+    isSelectionMode.value = false;
+    isClearingChat.value = false;
+    selectedFriendIds.clear();
     searchFocusNode.unfocus();
     socket?.off(appConstant.onSetChatUserlist);
     socket?.off(appConstant.onIncomingCall);
     socket?.off(appConstant.onSetUnreadChatThreadCount);
     socket?.off(appConstant.onUpdateChatList);
+    socket?.off(appConstant.onSetChatCleared);
     searchController.clear();
     mapCall = <String, dynamic>{};
+  }
+
+  void toggleSelectionMode() {
+    if (isSelectionMode.value) {
+      exitSelectionMode();
+      return;
+    }
+    isSelectionMode.value = true;
+  }
+
+  void exitSelectionMode() {
+    isSelectionMode.value = false;
+    selectedFriendIds.clear();
+  }
+
+  void toggleChatSelection(String? friendId) {
+    if (friendId == null || friendId.isEmpty) {
+      return;
+    }
+    if (selectedFriendIds.contains(friendId)) {
+      selectedFriendIds.remove(friendId);
+    } else {
+      selectedFriendIds.add(friendId);
+    }
+  }
+
+  void selectAllChats() {
+    selectedFriendIds
+      ..clear()
+      ..addAll(
+        chatList.map((chat) => chat.userDetail?.friendId).whereType<String>(),
+      );
+  }
+
+  bool isChatSelected(String? friendId) {
+    return friendId != null && selectedFriendIds.contains(friendId);
+  }
+
+  void _applyClearedChats(List<String> clearedFriendIds) {
+    for (final friendId in clearedFriendIds) {
+      final index = chatList.indexWhere((chat) => chat.userDetail?.friendId == friendId);
+      if (index < 0) continue;
+      chatList[index].lastMessage = null;
+      chatList[index].unreadCount = 0;
+    }
+    chatList.refresh();
+    sortingList();
+  }
+
+  void _handlerChatCleared(userData) {
+    isClearingChat.value = false;
+    Loading.dismiss();
+    if (userData is! Map<String, dynamic>) return;
+
+    final success = userData['success'];
+    if (success == 0 || success == '0') {
+      showError(userData['Message']?.toString() ?? 'Could not clear chat.');
+      return;
+    }
+
+    final resData = userData['resData'] as Map<String, dynamic>?;
+    final clearedRaw = resData?['clearedFriendIds'];
+    final clearedFriendIds = clearedRaw is List
+        ? clearedRaw.map((id) => id.toString()).toList()
+        : <String>[];
+
+    _applyClearedChats(clearedFriendIds);
+    exitSelectionMode();
+    getIt<BaseHomeController>().requestUnreadChatThreadCount();
+
+    final message = userData['Message']?.toString() ?? '';
+    if (message.isNotEmpty) {
+      showSuccess(message);
+    }
+  }
+
+  Future<void> clearSelectedChats({bool clearAll = false}) async {
+    if (!clearAll && selectedFriendIds.isEmpty) {
+      return;
+    }
+
+    final confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        title: Text(clearAll ? AppStrings.T.clearAllChats : AppStrings.T.clearSelectedChats),
+        content: Text(
+          clearAll ? AppStrings.T.clearAllChatsConfirm : AppStrings.T.clearChatConfirm,
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(result: false), child: Text(AppStrings.T.cancel)),
+          TextButton(onPressed: () => Get.back(result: true), child: Text(AppStrings.T.yes)),
+        ],
+      ),
+    );
+    if (confirmed != true) {
+      return;
+    }
+
+    socket = appConstant.socket;
+    if (socket == null || socket!.connected != true) {
+      showError('Unable to clear chats. Please check your connection.');
+      return;
+    }
+
+    isClearingChat.value = true;
+    Loading.show();
+    socket!.emit(appConstant.emitClearChat, {
+      'userId': getIt<SharedPreferences>().getUserId,
+      'friendIds': clearAll ? <String>[] : selectedFriendIds.toList(),
+      'clearAll': clearAll,
+    });
   }
 
   void updateChatMessage({required MessagesDataModel model, required int index}) {
@@ -229,6 +363,7 @@ class MessagesController extends GetxController {
     if (index < 0 || index >= chatList.length) return;
     chatList[index].unreadCount = 0;
     sortingList();
+    getIt<BaseHomeController>().requestUnreadChatThreadCount();
   }
 
   void sortingList() {

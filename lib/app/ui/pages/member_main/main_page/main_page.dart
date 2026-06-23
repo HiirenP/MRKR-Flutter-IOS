@@ -49,6 +49,7 @@ class MainPage extends GetItHook<BaseHomeController> {
           currentIndex: controller.selectedIndex.value,
           counter: controller.notificationCount,
           chatUnreadBadge: controller.hasUnreadChat,
+          chatUnreadCount: controller.unreadChatThreadCount,
         );
       }),
     );

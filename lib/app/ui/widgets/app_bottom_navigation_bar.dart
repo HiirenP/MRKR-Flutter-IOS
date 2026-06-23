@@ -14,12 +14,14 @@ class AppBottomNavigationBar extends StatelessWidget {
     required this.currentIndex,
     required this.counter,
     this.chatUnreadBadge,
+    this.chatUnreadCount,
   });
 
   final Function(int) selectedCallback;
   final int currentIndex;
   final RxInt counter;
   final RxBool? chatUnreadBadge;
+  final RxInt? chatUnreadCount;
 
   static const Color _badgeColor = Colors.red;
 
@@ -89,12 +91,28 @@ class AppBottomNavigationBar extends StatelessWidget {
                     if (isMember && index == 2)
                       Obx(
                         () {
-                          if (chatUnreadBadge?.value ?? false) {
+                          final count = chatUnreadCount?.value ?? 0;
+                          if (count > 0 || (chatUnreadBadge?.value ?? false)) {
+                            final label = count > 9 ? '9+' : count.toString();
                             return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 2),
                               child: CircleAvatar(
-                                radius: 5,
+                                radius: count > 0 ? 10 : 5,
                                 backgroundColor: _badgeColor,
+                                child: count > 0
+                                    ? Center(
+                                        child: AppText(
+                                          label,
+                                          style: context.textTheme.bodySmall?.copyWith(
+                                            fontSize: 10,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      )
+                                    : null,
                               ),
                             );
                           }
