@@ -1271,7 +1271,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get showLess => 'Show less';
 
   @override
-  String get myMarkers => 'My MARKERS';
+  String get myMarkers => 'My Markers';
 
   @override
   String get nearByMarkerBars => 'Nearby Marker bars';

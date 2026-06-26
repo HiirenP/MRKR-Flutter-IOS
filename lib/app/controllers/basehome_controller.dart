@@ -60,8 +60,6 @@ class BaseHomeController extends GetxController {
       selectedIndex.value = index;
     }
     if (index == 2) {
-      hasUnreadChat.value = false;
-      unreadChatThreadCount.value = 0;
       getIt<MessagesController>().refreshChatListIfNeeded();
     }
   }
@@ -70,6 +68,10 @@ class BaseHomeController extends GetxController {
     final parsed = int.tryParse('$count') ?? 0;
     unreadChatThreadCount.value = parsed;
     hasUnreadChat.value = parsed > 0;
+  }
+
+  void syncUnreadChatBadgeFromMessages() {
+    applyUnreadChatThreadCount(getIt<MessagesController>().totalUnreadMessageCount);
   }
 
   void requestUnreadChatThreadCount() {
@@ -212,10 +214,6 @@ class BaseHomeController extends GetxController {
 
   void _handlerUnreadChatThreadCount(userData) {
     if (userData is! Map<String, dynamic>) return;
-    if (selectedIndex.value == 2) {
-      hasUnreadChat.value = false;
-      return;
-    }
     final resData = userData['resData'] as Map<String, dynamic>?;
     if (resData != null) {
       applyUnreadChatThreadCount(resData['count']);

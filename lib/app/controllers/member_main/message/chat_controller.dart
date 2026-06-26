@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:injectable/injectable.dart' as i;
 import 'package:marker/app/controllers/basehome_controller.dart';
+import 'package:marker/app/controllers/member_main/message/messages_controller.dart';
 import 'package:marker/app/data/models/chat_user_model/chat_user_model.dart';
 import 'package:marker/app/data/models/messages_model/messages_model.dart';
 import 'package:marker/app/data/models/redeemed_upcoming_model/redeemed_upcoming_model.dart';
@@ -427,6 +428,25 @@ class ChatController extends GetxController {
       messageList.clear();
       listGroup.clear();
     }
+    if (page == 1) {
+      _markCurrentChatReadInList();
+    }
+  }
+
+  void _markCurrentChatReadInList() {
+    final friendId = friendData?.userDetail?.friendId ?? '';
+    if (friendId.isEmpty) return;
+
+    try {
+      final messagesController = getIt<MessagesController>();
+      final index = messagesController.chatList.indexWhere((c) => c.userDetail?.friendId == friendId);
+      if (index >= 0) {
+        messagesController.chatList[index].unreadCount = 0;
+        messagesController.chatList.refresh();
+      }
+      getIt<BaseHomeController>().syncUnreadChatBadgeFromMessages();
+    } catch (_) {}
+    getIt<BaseHomeController>().requestUnreadChatThreadCount();
   }
 
   void _handlerUnreadCount(userData) {

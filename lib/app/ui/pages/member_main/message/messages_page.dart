@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:marker/app/controllers/member_main/message/messages_controller.dart';
+import 'package:marker/app/data/models/chat_user_model/chat_user_model.dart';
 import 'package:marker/app/data/models/messages_model/messages_model.dart';
 import 'package:marker/app/ui/pages/empty_screen.dart';
 import 'package:marker/app/ui/pages/member_main/message/chat_page.dart';
@@ -99,40 +100,6 @@ class MessagesPage extends GetItHook<MessagesController> {
             );
           }),
           const Gap(12),
-          Obx(() {
-            final unreadTotal = controller.totalUnreadMessageCount;
-            if (unreadTotal <= 0 || controller.isSelectionMode.value) {
-              return const SizedBox.shrink();
-            }
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.red.withValues(alpha: 0.35)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.mark_chat_unread_outlined, size: 16, color: Colors.red),
-                      const Gap(6),
-                      AppText(
-                        unreadTotal == 1 ? '1 unread message' : '$unreadTotal unread messages',
-                        style: context.textTheme.bodySmall?.copyWith(
-                          color: Colors.red.shade700,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }),
           TextInputField(
             type: InputType.text,
             controller: controller.searchController,
@@ -185,7 +152,6 @@ class MessagesPage extends GetItHook<MessagesController> {
                                     ChatPage.route(model, map: mapTemp)?.then(
                                       (value) {
                                         controller.mapCall.clear();
-                                        controller.clearUnreadForChat(index);
                                         if (value != null && value is MessagesDataModel) {
                                           controller.updateChatMessage(model: value, index: index);
                                         }
@@ -317,13 +283,11 @@ class MessagesPage extends GetItHook<MessagesController> {
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
-                                      subtitle: model.lastMessage != null &&
-                                              model.lastMessage?.message != null &&
-                                              model.lastMessage!.message!.trim().isNotEmpty
+                                      subtitle: model.lastMessage != null
                                           ? Padding(
                                               padding: const AppEdgeInsets.v5(),
                                               child: AppText(
-                                                model.lastMessage?.message ?? '',
+                                                _lastMessagePreview(model),
                                                 style: context.textTheme.bodySmall?.copyWith(
                                                   color: hasUnread
                                                       ? context.colorScheme.onSecondary
@@ -360,6 +324,15 @@ class MessagesPage extends GetItHook<MessagesController> {
   void onDispose() {
     controller.disposeRecords();
   }
+}
+
+String _lastMessagePreview(ChatDataModel model) {
+  final last = model.lastMessage;
+  if (last == null) return '';
+  final text = last.message?.trim() ?? '';
+  if (text.isNotEmpty) return text;
+  if (last.messageType == 'marker') return 'Sent a marker';
+  return '';
 }
 
 class _UnreadBadge extends StatelessWidget {

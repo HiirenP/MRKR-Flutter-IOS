@@ -2533,7 +2533,7 @@ abstract class AppLocalizations {
   /// No description provided for @myMarkers.
   ///
   /// In en, this message translates to:
-  /// **'My MARKERS'**
+  /// **'My Markers'**
   String get myMarkers;
 
   /// No description provided for @nearByMarkerBars.

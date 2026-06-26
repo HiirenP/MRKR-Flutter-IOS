@@ -100,12 +100,39 @@ class MessagesController extends GetxController {
     emitUserList();
   }
 
+  bool _hasChatHistory(ChatDataModel chat) {
+    final last = chat.lastMessage;
+    if (last == null) return false;
+    if (last.createdAt != null && last.createdAt!.isNotEmpty) return true;
+    if (last.messageType == 'marker') return true;
+    return (last.message ?? '').trim().isNotEmpty;
+  }
+
+  void _removeChatByFriendId(String friendId) {
+    chatList.removeWhere((chat) => chat.userDetail?.friendId == friendId);
+    isEmptyData.value = chatList.isEmpty;
+    chatList.refresh();
+    getIt<BaseHomeController>().syncUnreadChatBadgeFromMessages();
+  }
+
   void _handlerChatListUpdate(userData) {
     if (userData is! Map<String, dynamic>) return;
     final map = userData['resData'] as Map<String, dynamic>?;
     if (map == null || map.isEmpty) return;
     final friendId = map['friendId']?.toString() ?? '';
     if (friendId.isEmpty) return;
+
+    final lastMsg = map['message']?.toString() ?? map['lastMessage']?.toString() ?? '';
+    final createdAt = map['createdAt']?.toString();
+    final messageType = map['messageType']?.toString();
+    final hasVisibleMessage =
+        lastMsg.trim().isNotEmpty || messageType == 'marker' || (createdAt != null && createdAt.isNotEmpty);
+
+    if (!hasVisibleMessage) {
+      _removeChatByFriendId(friendId);
+      return;
+    }
+
     final index = chatList.indexWhere((c) => c.userDetail?.friendId == friendId);
     if (index < 0) {
       page = 1;
@@ -113,16 +140,11 @@ class MessagesController extends GetxController {
       return;
     }
     final item = chatList[index];
-    final lastMsg = map['message']?.toString() ?? map['lastMessage']?.toString() ?? '';
-    if (lastMsg.isEmpty) {
-      item.lastMessage = null;
-    } else {
-      item.lastMessage = MessagesDataModel(
-        message: lastMsg,
-        createdAt: map['createdAt']?.toString(),
-        messageType: map['messageType']?.toString(),
-      );
-    }
+    item.lastMessage = MessagesDataModel(
+      message: lastMsg,
+      createdAt: createdAt,
+      messageType: messageType,
+    );
 
     final currentUserId = getIt<SharedPreferences>().getUserId ?? '';
     final receiverId = _resolveSocketUserId(map['receiverId']);
@@ -139,6 +161,7 @@ class MessagesController extends GetxController {
 
     chatList[index] = item;
     sortingList();
+    getIt<BaseHomeController>().syncUnreadChatBadgeFromMessages();
   }
 
   String? _resolveSocketUserId(dynamic ref) {
@@ -183,7 +206,7 @@ class MessagesController extends GetxController {
     log('map-->$mapRaw');
     final response = ChatUserModel.fromJson(mapRaw);
     count = response.totalRecord ?? 0;
-    final tempList = response.data ?? [];
+    final tempList = (response.data ?? []).where(_hasChatHistory).toList();
     if (page == 1) {
       chatList.value = tempList;
       isEmptyData.value = tempList.isEmpty;
@@ -192,6 +215,7 @@ class MessagesController extends GetxController {
     }
     if (chatList.length != count) page++;
     sortingList();
+    getIt<BaseHomeController>().syncUnreadChatBadgeFromMessages();
   }
 
   void _handlerUpdateCall(userData) {
@@ -279,14 +303,16 @@ class MessagesController extends GetxController {
   }
 
   void _applyClearedChats(List<String> clearedFriendIds) {
-    for (final friendId in clearedFriendIds) {
-      final index = chatList.indexWhere((chat) => chat.userDetail?.friendId == friendId);
-      if (index < 0) continue;
-      chatList[index].lastMessage = null;
-      chatList[index].unreadCount = 0;
+    if (clearedFriendIds.isEmpty) {
+      chatList.clear();
+    } else {
+      chatList.removeWhere(
+        (chat) => clearedFriendIds.contains(chat.userDetail?.friendId),
+      );
     }
+    isEmptyData.value = chatList.isEmpty;
     chatList.refresh();
-    sortingList();
+    getIt<BaseHomeController>().syncUnreadChatBadgeFromMessages();
   }
 
   void _handlerChatCleared(userData) {
@@ -363,20 +389,18 @@ class MessagesController extends GetxController {
     if (index < 0 || index >= chatList.length) return;
     chatList[index].unreadCount = 0;
     sortingList();
+    getIt<BaseHomeController>().syncUnreadChatBadgeFromMessages();
     getIt<BaseHomeController>().requestUnreadChatThreadCount();
   }
 
   void sortingList() {
+    chatList.removeWhere((chat) => !_hasChatHistory(chat));
     chatList.sort((a, b) {
-      final aUnread = (a.unreadCount ?? 0) > 0;
-      final bUnread = (b.unreadCount ?? 0) > 0;
-      if (aUnread != bUnread) {
-        return aUnread ? -1 : 1;
-      }
       final adate = a.lastMessage?.createdAt ?? '';
       final bdate = b.lastMessage?.createdAt ?? '';
       return bdate.compareTo(adate);
     });
+    isEmptyData.value = chatList.isEmpty;
     chatList.refresh();
   }
 
