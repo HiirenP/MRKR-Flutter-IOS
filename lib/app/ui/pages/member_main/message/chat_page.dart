@@ -252,11 +252,11 @@ class ChatPage extends GetItHook<ChatController> {
                                                                                   ],
                                                                                 ),
                                                                               )
-                                                                            : //Marker widget view set in chat list
-                                                                            AppText(
-                                                                                messageModel.message ?? '',
-                                                                                style: context.textTheme.bodySmall
-                                                                                    ?.copyWith(color: sender ? context.colorScheme.secondaryFixedDim : context.colorScheme.onSecondary),
+                                                                            : Obx(
+                                                                                () => AppText(
+                                                                                  messageModel.message ?? '',
+                                                                                  style: controller.messageTextStyle(context, isSender: sender),
+                                                                                ),
                                                                               ),
                                                                       ),
                                                                       ),

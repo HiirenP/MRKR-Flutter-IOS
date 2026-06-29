@@ -3,11 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide MultipartFile;
 import 'package:injectable/injectable.dart' as i;
+import 'package:marker/app/controllers/member_main/message/chat_controller.dart';
 import 'package:marker/app/data/models/auth_model/auth_model.dart';
 import 'package:marker/app/data/models/blocked_user_model/blocked_user_model.dart';
 import 'package:marker/app/data/services/auth_service/auth_service.dart';
 import 'package:marker/app/data/services/member_service/member_service.dart';
 import 'package:marker/app/ui/pages/authentication/login_page.dart';
+import 'package:marker/app/ui/widgets/custom_text.dart';
 import 'package:marker/app/utils/constants/app_constant.dart';
 import 'package:marker/app/utils/constants/app_strings.dart';
 import 'package:marker/app/utils/constants/common_utils.dart';
@@ -78,6 +80,7 @@ class ProfileController extends GetxController {
       CommonModel(name: AppStrings.T.myProfile, icon: Assets.svg.profileCircle),
       CommonModel(name: AppStrings.T.changePassword, icon: Assets.svg.lock),
       CommonModel(name: AppStrings.T.transactionHistory, icon: Assets.svg.trasaction),
+      CommonModel(name: AppStrings.T.chatTextSize, icon: Assets.svg.documentText),
       CommonModel(name: AppStrings.T.blockUsers, icon: Assets.svg.icBlock),
       CommonModel(name: AppStrings.T.contactUs, icon: Assets.svg.contactUs),
       if (Platform.isIOS) CommonModel(name: AppStrings.T.tapToPayiPhone, icon: Assets.svg.contactless),
@@ -88,6 +91,71 @@ class ProfileController extends GetxController {
       CommonModel(name: AppStrings.T.deleteAccount, icon: Assets.svg.trash),
       CommonModel(name: AppStrings.T.logOut, icon: Assets.svg.logout),
     ]);
+  }
+
+  Future<void> showChatFontSizeSheet() async {
+    final prefs = getIt<SharedPreferences>();
+    final currentSize = prefs.getChatFontSize;
+    final context = Get.context!;
+
+    await Get.bottomSheet<void>(
+      SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppText(
+                AppStrings.T.chatTextSize,
+                style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              _chatFontSizeTile(
+                context: context,
+                label: AppStrings.T.chatTextSizeSmall,
+                size: SharedPreferencesX.chatFontSizeSmall,
+                selected: currentSize == SharedPreferencesX.chatFontSizeSmall,
+              ),
+              _chatFontSizeTile(
+                context: context,
+                label: AppStrings.T.chatTextSizeMedium,
+                size: SharedPreferencesX.chatFontSizeMedium,
+                selected: currentSize == SharedPreferencesX.chatFontSizeMedium,
+              ),
+              _chatFontSizeTile(
+                context: context,
+                label: AppStrings.T.chatTextSizeLarge,
+                size: SharedPreferencesX.chatFontSizeLarge,
+                selected: currentSize == SharedPreferencesX.chatFontSizeLarge,
+              ),
+            ],
+          ),
+        ),
+      ),
+      backgroundColor: context.colorScheme.secondary,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+    );
+  }
+
+  Widget _chatFontSizeTile({
+    required BuildContext context,
+    required String label,
+    required double size,
+    required bool selected,
+  }) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: AppText(label, style: TextStyle(fontSize: size)),
+      trailing: selected ? Icon(Icons.check_circle, color: context.colorScheme.primary) : null,
+      onTap: () {
+        ChatController.applyChatFontSize(size);
+        Get.back();
+        showSuccess('${AppStrings.T.chatTextSize}: $label');
+      },
+    );
   }
 
   Future<void> addMyprofileList() async {

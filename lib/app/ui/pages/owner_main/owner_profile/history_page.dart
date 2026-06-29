@@ -195,7 +195,7 @@ class _WalletHistoryTileState extends State<_WalletHistoryTile> {
                   AppValidations.getFormattedPrice(list.amount ?? 0),
                   style: context.textTheme.bodyMedium?.copyWith(
                     color: widget.isWithdraw || widget.isMemberTransaction
-                        ? AppColors.red
+                        ? AppColors.black
                         : context.colorScheme.onPrimaryContainer,
                     fontWeight: FontWeight.bold,
                   ),

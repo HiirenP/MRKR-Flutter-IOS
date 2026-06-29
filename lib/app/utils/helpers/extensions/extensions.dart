@@ -107,6 +107,16 @@ extension SharedPreferencesX on SharedPreferences {
     }
   }
 
+  static const double chatFontSizeSmall = 14;
+  static const double chatFontSizeMedium = 16;
+  static const double chatFontSizeLarge = 18;
+
+  double get getChatFontSize => getDouble('chatFontSize') ?? chatFontSizeMedium;
+
+  set setChatFontSize(double value) {
+    setDouble('chatFontSize', value);
+  }
+
   String? get getBarId {
     return getString('barId');
   }

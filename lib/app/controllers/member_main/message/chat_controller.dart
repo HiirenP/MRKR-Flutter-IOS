@@ -59,8 +59,28 @@ class ChatController extends GetxController {
   RedeemedUpcomingListData? marker;
   List<String> listDefaultMessage = ['Let me treat you', 'Your drink is on me', 'My treat, don’t ask why', 'I paid. You sip.'];
   RxBool isVideoCall = false.obs;
+  final RxDouble messageFontSize = SharedPreferencesX.chatFontSizeMedium.obs;
+
+  static void applyChatFontSize(double size) {
+    getIt<SharedPreferences>().setChatFontSize = size;
+    try {
+      getIt<ChatController>().messageFontSize.value = size;
+    } catch (_) {}
+  }
+
+  void loadMessageFontSize() {
+    messageFontSize.value = getIt<SharedPreferences>().getChatFontSize;
+  }
+
+  TextStyle messageTextStyle(BuildContext context, {required bool isSender}) {
+    return (context.textTheme.bodyMedium ?? const TextStyle()).copyWith(
+      fontSize: messageFontSize.value,
+      color: isSender ? context.colorScheme.secondaryFixedDim : context.colorScheme.onSecondary,
+    );
+  }
 
   void chatInitialize() {
+    loadMessageFontSize();
     page = 1;
     messageList.clear();
     listGroup.value = [];

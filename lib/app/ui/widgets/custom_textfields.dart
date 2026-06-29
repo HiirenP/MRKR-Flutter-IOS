@@ -102,7 +102,7 @@ class TextInputField extends TextFormField {
           inputFormatters: [
             if (inputFormatters != null) ...inputFormatters,
             if (type == InputType.digits) FilteringTextInputFormatter.digitsOnly,
-            if (type == InputType.decimalDigits) FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+            if (type == InputType.decimalDigits) FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}$')),
           ],
           obscureText: obscureText?.value ?? false,
           style: labelStyle ?? context.textTheme.labelMedium,

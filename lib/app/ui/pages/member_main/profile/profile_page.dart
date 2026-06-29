@@ -52,6 +52,8 @@ class ProfilePage extends GetItHook<ProfileController> {
                       ChangePwdPage.route();
                     } else if (itemName == AppStrings.T.transactionHistory) {
                       TransactionHistoryPage.route();
+                    } else if (itemName == AppStrings.T.chatTextSize) {
+                      controller.showChatFontSizeSheet();
                     } else if (itemName == AppStrings.T.blockUsers) {
                       BlockUsersPage.route();
                     } else if (itemName == AppStrings.T.contactUs) {

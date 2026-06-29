@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart' as i;
 import 'package:marker/app/data/models/bar_drink_details_model/bar_drink_details_model.dart';
 import 'package:marker/app/data/models/search_drinks_model/search_drinks_model.dart';
@@ -9,9 +10,10 @@ import 'package:marker/app/ui/widgets/custom_bottom_sheet.dart';
 import 'package:marker/app/ui/widgets/custom_image_view.dart';
 import 'package:marker/app/ui/widgets/custom_textfields.dart';
 import 'package:marker/app/utils/constants/common_utils.dart';
-import 'package:marker/app/utils/helpers/json_num_util.dart';
 import 'package:marker/app/utils/helpers/exception/exception.dart';
 import 'package:marker/app/utils/helpers/exporter.dart';
+import 'package:marker/app/utils/helpers/json_num_util.dart';
+import 'package:marker/app/utils/helpers/validations/validations.dart';
 import 'package:marker/gen/assets.gen.dart';
 
 @i.lazySingleton
@@ -156,16 +158,26 @@ class DrinkDetailsController extends GetxController {
           key: formKey,
           child: AppBottomSheet(
             title: AppStrings.T.tipAmount('').split(':').firstOrNull,
+            subTitle: AppStrings.T.tipAmountCurrencyHint,
             isDivider: true,
             content: TextInputField(
               type: InputType.decimalDigits,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               textInputAction: TextInputAction.done,
               controller: enterAmountController,
-              hintLabel: AppStrings.T.enterTipAmount,
+              hintLabel: '0.00',
               context: context,
-              validator: AppValidations.amountValidation,
-              prefixIcon: ImageView(Assets.svg.moneys),
+              validator: AppValidations.tipAmountValidation,
+              prefixIcon: Padding(
+                padding: const EdgeInsets.only(left: 14, right: 4),
+                child: Center(
+                  widthFactor: 1,
+                  child: Text(
+                    AppValidations.currencySymbol,
+                    style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
             ),
             positiveButtonTitle: AppStrings.T.add,
             onPositivePressed: () async {

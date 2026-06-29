@@ -945,6 +945,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emptyAmount => 'Please enter amount';
 
   @override
+  String get invalidAmount => 'Please enter a valid amount';
+
+  @override
   String get pleaseSelectImage => 'Please select image';
 
   @override
@@ -1272,6 +1275,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get myMarkers => 'My Markers';
+
+  @override
+  String get chatTextSize => 'Chat Text Size';
+
+  @override
+  String get chatTextSizeSmall => 'Small';
+
+  @override
+  String get chatTextSizeMedium => 'Medium';
+
+  @override
+  String get chatTextSizeLarge => 'Large';
+
+  @override
+  String get tipAmountCurrencyHint => 'Amount in USD (\$)';
 
   @override
   String get nearByMarkerBars => 'Nearby Marker bars';

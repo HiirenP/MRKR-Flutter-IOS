@@ -5,6 +5,9 @@ import 'package:marker/app/utils/constants/app_strings.dart';
 class AppValidations {
   AppValidations._();
 
+  static const String currencyCode = 'USD';
+  static const String currencySymbol = '\$';
+
   static String getFormattedPrice(dynamic amount) {
     double price = 0;
 
@@ -20,9 +23,9 @@ class AppValidations {
     price = (price * 100).round() / 100;
 
     if (price % 1 == 0) {
-      return "\$${price.toInt()}";
+      return '$currencySymbol${price.toInt()}';
     }
-    return "\$${price.toStringAsFixed(2)}";
+    return '$currencySymbol${price.toStringAsFixed(2)}';
   }
 
   static String? verificationCodeValidation(String? value) {
@@ -194,6 +197,13 @@ class AppValidations {
 
   static String? amountValidation(String? value) {
     if (value == null || value.isEmpty) return AppStrings.T.emptyAmount;
+    return null;
+  }
+
+  static String? tipAmountValidation(String? value) {
+    if (value == null || value.trim().isEmpty) return AppStrings.T.emptyAmount;
+    final parsed = double.tryParse(value.trim());
+    if (parsed == null || parsed < 0) return AppStrings.T.invalidAmount;
     return null;
   }
 

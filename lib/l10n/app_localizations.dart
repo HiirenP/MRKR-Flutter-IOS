@@ -1936,6 +1936,12 @@ abstract class AppLocalizations {
   /// **'Please enter amount'**
   String get emptyAmount;
 
+  /// No description provided for @invalidAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid amount'**
+  String get invalidAmount;
+
   /// No description provided for @pleaseSelectImage.
   ///
   /// In en, this message translates to:
@@ -2535,6 +2541,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'My Markers'**
   String get myMarkers;
+
+  /// No description provided for @chatTextSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat Text Size'**
+  String get chatTextSize;
+
+  /// No description provided for @chatTextSizeSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get chatTextSizeSmall;
+
+  /// No description provided for @chatTextSizeMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get chatTextSizeMedium;
+
+  /// No description provided for @chatTextSizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get chatTextSizeLarge;
+
+  /// No description provided for @tipAmountCurrencyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount in USD (\$)'**
+  String get tipAmountCurrencyHint;
 
   /// No description provided for @nearByMarkerBars.
   ///
