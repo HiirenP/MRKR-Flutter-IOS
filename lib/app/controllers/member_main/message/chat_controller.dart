@@ -56,6 +56,8 @@ class ChatController extends GetxController {
   bool isUserScrolling = false;
   bool isBackOnce = false;
   bool fromSendMarker = false;
+  bool _isDisposing = false;
+  void Function(dynamic)? _chatOnConnectHandler;
   RedeemedUpcomingListData? marker;
   List<String> listDefaultMessage = ['Let me treat you', 'Your drink is on me', 'My treat, don’t ask why', 'I paid. You sip.'];
   RxBool isVideoCall = false.obs;
@@ -80,6 +82,7 @@ class ChatController extends GetxController {
   }
 
   void chatInitialize() {
+    _isDisposing = false;
     loadMessageFontSize();
     page = 1;
     messageList.clear();
@@ -107,9 +110,6 @@ class ChatController extends GetxController {
         fromSendMarker = true;
         marker = friendData?.lastMessage?.markerId;
         markerId.value = marker?.sId ?? '';
-        Future.delayed(Duration(seconds: 1), () {
-          getIt<BaseHomeController>().selectedIndex.value = 2;
-        });
       }
       _setupSocketForChat();
     }
@@ -147,7 +147,7 @@ class ChatController extends GetxController {
     });
   }
 
-  void _registerChatSocketListeners() {
+  void _unregisterChatSocketListeners() {
     if (socket == null) return;
     socket!.off(appConstant.onSetMessageList);
     socket!.off(appConstant.onSetNewMessage);
@@ -158,6 +158,32 @@ class ChatController extends GetxController {
     socket!.off(appConstant.onSetMessageDeleted);
     socket!.off(appConstant.onMessageReactionUpdated);
     socket!.off(appConstant.onSetMessageReaction);
+    if (_chatOnConnectHandler != null) {
+      socket!.off('connect', _chatOnConnectHandler);
+      _chatOnConnectHandler = null;
+    }
+  }
+
+  bool get _shouldIgnoreChatUpdates => isBackOnce || _isDisposing;
+
+  void _deferChatObservableReset() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!isClosed) {
+        listGroup.value = [];
+        messageList.clear();
+        showEmojiPicker.value = false;
+        userName.value = '';
+        isLoading.value = false;
+        isSend.value = false;
+        markerId.value = '';
+        callingState.value = ApiState.initial();
+      }
+    });
+  }
+
+  void _registerChatSocketListeners() {
+    if (socket == null) return;
+    _unregisterChatSocketListeners();
     socket!.on(appConstant.onSetMessageList, _handlerMessageChat);
     socket!.on(appConstant.onSetNewMessage, _handlerNewMessage);
     socket!.on(appConstant.onSetUnreadChatThreadCount, _handlerUnreadCount);
@@ -167,10 +193,12 @@ class ChatController extends GetxController {
     socket!.on(appConstant.onSetMessageDeleted, _handlerMessageDeleted);
     socket!.on(appConstant.onMessageReactionUpdated, _handlerReactionUpdated);
     socket!.on(appConstant.onSetMessageReaction, _handlerReactionUpdated);
-    socket!.onConnect((_) {
+    _chatOnConnectHandler = (_) {
+      if (_shouldIgnoreChatUpdates) return;
       isConnected = true;
       emitMessageList();
-    });
+    };
+    socket!.onConnect(_chatOnConnectHandler!);
   }
 
   String _resolveUserId() {
@@ -315,6 +343,7 @@ class ChatController extends GetxController {
   }
 
   void _handlerNewMessage(userData) {
+    if (_shouldIgnoreChatUpdates) return;
     if (userData is! Map<String, dynamic>) return;
     final success = userData['success'];
     if (success != null && success.toString() == '0') {
@@ -414,6 +443,7 @@ class ChatController extends GetxController {
   }
 
   void _handlerMessageChat(userData) {
+    if (_shouldIgnoreChatUpdates) return;
     isLoading.value = false;
     log('handlerMessageChat-->${jsonEncode(userData)}');
     if (userData is! Map<String, dynamic>) return;
@@ -661,31 +691,23 @@ class ChatController extends GetxController {
   }
 
   void disposeRecords() {
-    listGroup.value = [];
+    if (_isDisposing) return;
+    _isDisposing = true;
+
     isUserScrolling = false;
-    isBackOnce = false;
     if (socket != null && userId.isNotEmpty) {
       socket!.emit(appConstant.emitChatScreenLeft, {'userId': userId});
     }
-    socket?.off(appConstant.onSetMessageList);
-    socket?.off(appConstant.onSetNewMessage);
-    socket?.off(appConstant.onSetUnreadChatThreadCount);
-    socket?.off(appConstant.onUpdateChatList);
-    socket?.off(appConstant.onIncomingCall);
-    socket?.off(appConstant.onMessageDeleted);
-    socket?.off(appConstant.onSetMessageDeleted);
+    _unregisterChatSocketListeners();
     messageFocusNode.unfocus();
-    showEmojiPicker.value = false;
     messageController.clear();
     userId = '';
-    userName.value = '';
     onces = false;
-    isLoading.value = false;
-    callingState.value = ApiState.initial();
     callChannel = '';
     marker = null;
     fromSendMarker = false;
     page = 1;
+    _deferChatObservableReset();
   }
 
   Future<void> onUserBack() async {
@@ -694,14 +716,21 @@ class ChatController extends GetxController {
     }
     isBackOnce = true;
     keyboardHide();
-    if (fromSendMarker) {
-      fromSendMarker = false;
-      await MainPage.route(selectedIndex: 2);
+
+    final goToMessagesTab = fromSendMarker;
+    fromSendMarker = false;
+
+    if (goToMessagesTab) {
+      disposeRecords();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        MainPage.route(selectedIndex: 2);
+      });
       return;
     }
-    if (messageList.isNotEmpty) {
-      final model = messageList.last;
-      Get.back(result: model);
+
+    final lastMessage = messageList.isNotEmpty ? messageList.last : null;
+    if (lastMessage != null) {
+      Get.back(result: lastMessage);
     } else {
       Get.back();
     }

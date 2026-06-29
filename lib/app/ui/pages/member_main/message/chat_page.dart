@@ -252,11 +252,9 @@ class ChatPage extends GetItHook<ChatController> {
                                                                                   ],
                                                                                 ),
                                                                               )
-                                                                            : Obx(
-                                                                                () => AppText(
-                                                                                  messageModel.message ?? '',
-                                                                                  style: controller.messageTextStyle(context, isSender: sender),
-                                                                                ),
+                                                                            : AppText(
+                                                                                messageModel.message ?? '',
+                                                                                style: controller.messageTextStyle(context, isSender: sender),
                                                                               ),
                                                                       ),
                                                                       ),
