@@ -10,6 +10,7 @@ import 'package:marker/app/ui/widgets/custom_bottom_sheet.dart';
 import 'package:marker/app/ui/widgets/custom_image_view.dart';
 import 'package:marker/app/ui/widgets/custom_textfields.dart';
 import 'package:marker/app/utils/constants/common_utils.dart';
+import 'package:marker/app/utils/helpers/cent_amount_input_formatter.dart';
 import 'package:marker/app/utils/helpers/exception/exception.dart';
 import 'package:marker/app/utils/helpers/exporter.dart';
 import 'package:marker/app/utils/helpers/json_num_util.dart';
@@ -161,13 +162,14 @@ class DrinkDetailsController extends GetxController {
             subTitle: AppStrings.T.tipAmountCurrencyHint,
             isDivider: true,
             content: TextInputField(
-              type: InputType.decimalDigits,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              type: InputType.text,
+              keyboardType: TextInputType.number,
               textInputAction: TextInputAction.done,
               controller: enterAmountController,
               hintLabel: '0.00',
               context: context,
               validator: AppValidations.tipAmountValidation,
+              inputFormatters: [CentAmountInputFormatter()],
               prefixIcon: Padding(
                 padding: const EdgeInsets.only(left: 14, right: 4),
                 child: Center(

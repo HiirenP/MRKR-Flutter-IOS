@@ -26,6 +26,7 @@ import 'package:marker/app/ui/pages/member_main/message/video_call_page.dart';
 import 'package:marker/app/ui/pages/member_main/notifications/notifications_page.dart';
 import 'package:marker/app/ui/pages/splash_screen.dart';
 import 'package:marker/app/utils/constants/app_constant.dart';
+import 'package:marker/app/utils/constants/common_utils.dart';
 import 'package:marker/app/utils/helpers/extensions/extensions.dart';
 import 'package:marker/app/utils/helpers/injectable/injectable.config.dart';
 import 'package:marker/app/utils/helpers/injectable/injectable.dart';
@@ -533,8 +534,13 @@ class PushNotifications {
                   },
                   from: 'on-message');
             } else if (message.notification != null) {
+              final notificationBody = message.notification!.body;
               await PushNotifications.showSimpleNotification(
-                  title: message.notification!.title ?? 'No Title', body: message.notification!.body ?? 'No Body', payload: payloadData);
+                  title: message.notification!.title ?? 'No Title',
+                  body: notificationBody == null || notificationBody.isEmpty
+                      ? 'No Body'
+                      : formatNotificationBody(notificationBody),
+                  payload: payloadData);
             }
           }
         }

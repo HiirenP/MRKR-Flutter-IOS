@@ -57,7 +57,8 @@ String hideText(String? text, {String? format, int limit = 3}) {
 String formatNotificationBody(String? body) {
   if (body == null || body.isEmpty) return body ?? '';
   return body.replaceAllMapped(
-    RegExp(r'\$(\d+(?:\.\d+)?)'),
+    // Match $17.99 and float artifacts like $17.990000000000002
+    RegExp(r'\$([\d]+\.?[\d]*)'),
     (match) {
       final amount = double.tryParse(match.group(1) ?? '');
       if (amount == null) return match.group(0)!;

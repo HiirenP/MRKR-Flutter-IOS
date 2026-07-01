@@ -67,13 +67,9 @@ class AppConfig {
   };
 
   static Future<void> getCurrentVersionCode() async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-
-    if (Platform.isAndroid) {
-      currentBuildVersion = packageInfo.buildNumber;
-    } else {
-      currentBuildVersion = packageInfo.version;
-    }
+    final packageInfo = await PackageInfo.fromPlatform();
+    // Integer build number from pubspec (+N) — same on Android and iOS for force-update checks.
+    currentBuildVersion = packageInfo.buildNumber;
   }
 
   static Future<void> getDeviceName() async {

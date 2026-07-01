@@ -66,6 +66,7 @@ class TextInputField extends TextFormField {
     int? errorMaxLines,
     List<TextInputFormatter>? inputFormatters,
     super.focusNode,
+    super.onEditingComplete,
   })  : assert(type != InputType.multiline || textInputAction == TextInputAction.newline,
             'Make textInputAction = TextInputAction.newline'),
         assert(
